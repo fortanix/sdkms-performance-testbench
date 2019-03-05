@@ -11,6 +11,7 @@ package com.fortanix.sdkms.performance.sampler;
 import com.fortanix.sdkms.v1.ApiException;
 import com.fortanix.sdkms.v1.api.SignAndVerifyApi;
 import com.fortanix.sdkms.v1.model.SignRequest;
+import com.fortanix.sdkms.v1.model.BatchSignRequest;
 import org.apache.jmeter.protocol.java.sampler.JavaSamplerContext;
 import org.apache.jmeter.samplers.SampleResult;
 
@@ -25,19 +26,25 @@ public class SignatureGenerationSampler extends AbstractSignatureSampler {
                 SignAndVerifyApi signAndVerifyApi;
                 String keyId;
                 SignRequest signRequest;
+                BatchSignRequest batchSignRequest;
 
-                RetryableOperation init(SignAndVerifyApi signAndVerifyApi, String keyId, SignRequest signRequest) {
+                RetryableOperation init(SignAndVerifyApi signAndVerifyApi, String keyId, SignRequest signRequest, BatchSignRequest batchSignRequest) {
                     this.signAndVerifyApi = signAndVerifyApi;
                     this.keyId = keyId;
                     this.signRequest = signRequest;
+                    this.batchSignRequest = batchSignRequest;
                     return this;
                 }
 
                 @Override
                 public Object execute() throws ApiException {
-                    return this.signAndVerifyApi.sign(this.keyId, this.signRequest);
+                    if (this.batchSignRequest == null) {
+                        return this.signAndVerifyApi.sign(this.keyId, this.signRequest);
+                    } else{
+                        return this.signAndVerifyApi.batchSign(this.batchSignRequest);
+                    }
                 }
-            }.init(this.signAndVerifyApi, this.keyId, this.signRequest));
+            }.init(this.signAndVerifyApi, this.keyId, this.signRequest, this.batchSignRequest));
             result.setSuccessful(true);
         } catch (ApiException e) {
             LOGGER.info("failure in generating signature : " + e.getMessage());

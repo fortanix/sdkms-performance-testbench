@@ -66,7 +66,7 @@ function update_jmx(){
     sed -i.bak s/$TRANSIENT_TEXT/$TRANSIENT/g $JMX_FILE
     sed -i.bak s/$MODE_TEXT/$MODE/g $JMX_FILE
     if [[ "${MAX_FILE}" == "true" ]]; then
-    	FILEPATH=$SDKMS_REST_API_HOME"/src/test/resources/LargeFile.txt"
+        FILEPATH=$SDKMS_REST_API_HOME"/src/test/resources/LargeFile.txt"
     fi
     sed -i.bak 's|'$FILEPATH_TEXT'|'$FILEPATH'|g' $JMX_FILE
     sed -i.bak s/$PLUGIN_TYPE_TEXT/$PLUGIN_TYPE/g $JMX_FILE
@@ -130,13 +130,13 @@ while [ $# -gt 0 ]; do
    --filepath)
       FILEPATH="$2"
       ;;
-	--hash-algorithm)
+    --hash-algorithm)
       HASH_ALGORITHM="$2"
       ;;
    --mode)
       MODE="$2"
       ;;
-	--max-file)
+    --max-file)
       MAX_FILE="$2"
       ;;
     --pluginType)
@@ -157,7 +157,7 @@ while [ $# -gt 0 ]; do
     --batchSize)
       BATCH_SIZE="$2"
       ;;
-	--jvm-args)
+    --jvm-args)
       JVM_ARGS_INPUT="$2"
       ;;
       *)
@@ -182,8 +182,12 @@ function print_end(){
 
     HTML_OUTPUT_DIR=$(ls -td -- $SDKMS_REST_API_HOME"/target/jmeter/reports/"* | head -n 1)
     CSV_OUTPUT_FILE=$(ls -td -- $SDKMS_REST_API_HOME"/target/jmeter/results/"* | head -n 1)
-    AGGREGATE_OUTPUT_FILE=$SDKMS_REST_API_HOME"/target/jmeter/results/"$2"-"$ALGORITHM"-"$KEYSIZE"-"$THREAD_COUNT"THREADS-"$EXECUTION_TIME"SECONDS-AGGREGATE.csv"
-
+    if [ -z "$BATCH_SIZE" ]
+    then
+        AGGREGATE_OUTPUT_FILE=$SDKMS_REST_API_HOME"/target/jmeter/results/"$2"-"$ALGORITHM"-"$KEYSIZE"-"$THREAD_COUNT"THREADS-"$EXECUTION_TIME"SECONDS-AGGREGATE.csv"
+    else
+        AGGREGATE_OUTPUT_FILE=$SDKMS_REST_API_HOME"/target/jmeter/results/"BATCH""$2"-"$ALGORITHM"-"$KEYSIZE"-"$THREAD_COUNT"THREADS-"$EXECUTION_TIME"SECONDS-BATCHSIZE-"$BATCH_SIZE"-AGGREGATE.csv"
+    fi
     java -jar $SDKMS_REST_API_HOME"/target/jmeter/lib/ext/cmdrunner-2.0.jar" --tool Reporter --generate-csv $AGGREGATE_OUTPUT_FILE --input-jtl $CSV_OUTPUT_FILE --plugin-type AggregateReport
 
     BANDWIDTH="NA"
@@ -361,7 +365,7 @@ function sign_task() {
     then
         echo "sign captures metrics for RSA or EC signature generation"
         echo "   usage:"
-        echo "   # ${SCRIPT_NAME} run sign [--algorithm RSA|EC] [--keysize 1024|2048] [--filepath </path/to/file>] [--threadcount 50|100] [--time 300|600]"
+        echo "   # ${SCRIPT_NAME} run sign [--algorithm RSA|EC] [--keysize 1024|2048] [--filepath </path/to/file>] [--threadcount 50|100] [--time 300|600] [--batchsize 10|100|1000]"
         echo "   options:"
         echo "   --algorithm    Signature generation algorithm. Supported algorithms are RSA and EC"
         echo "                  default value is RSA."
@@ -373,6 +377,8 @@ function sign_task() {
         echo "                  default value is 50."
         echo "   --time         Time in seconds to hold the jmeter execution."
         echo "                  default value is 300."
+        echo "   --batchsize    Create a batch sign request with the provided batch size."
+        echo "                  Default is 0 (non batch) single sign request."
         echo ""
         echo "One can also pass proxy(http/https) related jvm args as a csv string: --jvm-args '-Dhttps.proxyHost=proxy,-Dhttps.proxyPort=8080,-Dhttps.proxyUser=user,-Dhttps.proxyPassword=pwd'"
         return
@@ -393,7 +399,7 @@ function verify_task() {
     then
         echo "verify captures metrics for RSA or EC signature verification"
         echo "   usage:"
-        echo "   # ${SCRIPT_NAME} run verify [--algorithm RSA|EC] [--keysize 1024|2048] [--threadcount 50|100] [--time 300|600]"
+        echo "   # ${SCRIPT_NAME} run verify [--algorithm RSA|EC] [--keysize 1024|2048] [--threadcount 50|100] [--time 300|600] [--batchsize 10|100|1000]"
         echo "   options:"
         echo "   --algorithm    Signature verification algorithm. Supported algorithms are RSA and EC"
         echo "                  default value is RSA."
@@ -405,6 +411,8 @@ function verify_task() {
         echo "                  default value is 50."
         echo "   --time         Time in seconds to hold the jmeter execution."
         echo "                  default value is 300."
+        echo "   --batchsize    Create a batch verify request with the provided batch size."
+        echo "                  Default is 0 (non batch) single verify request."
         echo ""
         echo "One can also pass proxy(http/https) related jvm args as a csv string: --jvm-args '-Dhttps.proxyHost=proxy,-Dhttps.proxyPort=8080,-Dhttps.proxyUser=user,-Dhttps.proxyPassword=pwd'"
         return
@@ -429,7 +437,7 @@ function mac_generate_task() {
         echo "   options:"
         echo "   --algorithm       Mac generation algorithm. Supported algorithms are Hmac"
         echo "                     default value is Hmac."
-		echo "   --hash-algorithm  hash algorithm. Supported algorithms are SHA1|SHA256|SHA384|SHA512"
+        echo "   --hash-algorithm  hash algorithm. Supported algorithms are SHA1|SHA256|SHA384|SHA512"
         echo "                     default value is SHA1."
         echo "   --keysize         keysize for mac generation algorithm. Supported keysize are 160|256|384|512"
         echo "                     default value is 160."
@@ -462,7 +470,7 @@ function mac_verify_task() {
         echo "   options:"
         echo "   --algorithm       Mac verification algorithm. Supported algorithms are Hmac"
         echo "                     default value is Hmac."
-		echo "   --hash-algorithm  hash algorithm. Supported algorithms are SHA1|SHA256|SHA384|SHA512"
+        echo "   --hash-algorithm  hash algorithm. Supported algorithms are SHA1|SHA256|SHA384|SHA512"
         echo "                     default value is SHA1."
         echo "   --keysize         keysize for mac generation algorithm. Supported keysize are 160|256|384|512"
         echo "                     default value is 160."
@@ -534,7 +542,7 @@ function run_task(){
         verify)
             task="verify_task"
             ;;
-		mac-generate)
+        mac-generate)
             task="mac_generate_task"
             ;;
         mac-verify)

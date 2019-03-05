@@ -27,4 +27,5 @@ class Constants {
     static final String MODE = "mode";
     static final String FILE_PATH = "filePath";
     static final String HASH_ALGORITHM = "hashAlgorithm";
+    static final String BATCH_SIZE = "batchSize";
 }
