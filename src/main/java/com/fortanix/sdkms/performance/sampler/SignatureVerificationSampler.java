@@ -10,16 +10,19 @@ package com.fortanix.sdkms.performance.sampler;
 
 import com.fortanix.sdkms.v1.ApiException;
 import com.fortanix.sdkms.v1.api.SignAndVerifyApi;
-import com.fortanix.sdkms.v1.model.VerifyRequest;
+import com.fortanix.sdkms.v1.model.*;
 import org.apache.jmeter.protocol.java.sampler.JavaSamplerContext;
 import org.apache.jmeter.samplers.SampleResult;
 
 import java.security.ProviderException;
 import java.util.logging.Level;
+import java.util.ArrayList;
 
 public class SignatureVerificationSampler extends AbstractSignatureSampler {
 
     private VerifyRequest verifyRequest;
+    private VerifyRequestEx verifyRequestEx;
+    private BatchVerifyRequest batchVerifyRequest;
 
     @Override
     public void setupTest(JavaSamplerContext context) {
@@ -32,6 +35,13 @@ public class SignatureVerificationSampler extends AbstractSignatureSampler {
             throw new ProviderException(e.getMessage());
         }
         this.verifyRequest = new VerifyRequest().hashAlg(HASH_ALGORITHM).hash(this.hash).signature(signature);
+        this.verifyRequestEx = new VerifyRequestEx().hashAlg(HASH_ALGORITHM).hash(this.hash).key(new SobjectDescriptor().kid(this.keyId)).signature(signature);
+        if (this.batchSignRequest.size() != 0){
+            this.batchVerifyRequest = new BatchVerifyRequest();
+            for ( int i = 0; i < this.batchSignRequest.size() ; i++ ) {
+                this.batchVerifyRequest.add(this.verifyRequestEx);
+            }
+        }
     }
 
     @Override
@@ -43,19 +53,25 @@ public class SignatureVerificationSampler extends AbstractSignatureSampler {
                 SignAndVerifyApi signAndVerifyApi;
                 String keyId;
                 VerifyRequest verifyRequest;
+                BatchVerifyRequest batchVerifyRequest;
 
-                RetryableOperation init(SignAndVerifyApi signAndVerifyApi, String keyId, VerifyRequest verifyRequest) {
+                RetryableOperation init(SignAndVerifyApi signAndVerifyApi, String keyId, VerifyRequest verifyRequest, BatchVerifyRequest batchVerifyRequest) {
                     this.signAndVerifyApi = signAndVerifyApi;
                     this.keyId = keyId;
                     this.verifyRequest = verifyRequest;
+                    this.batchVerifyRequest = batchVerifyRequest;
                     return this;
                 }
 
                 @Override
                 public Object execute() throws ApiException {
-                    return this.signAndVerifyApi.verify(this.keyId, this.verifyRequest);
+                    if (this.batchVerifyRequest == null) {
+                        return this.signAndVerifyApi.verify(this.keyId, this.verifyRequest);
+                    } else{
+                        return this.signAndVerifyApi.batchVerify(this.batchVerifyRequest);
+                    }
                 }
-            }.init(this.signAndVerifyApi, this.keyId, this.verifyRequest));
+            }.init(this.signAndVerifyApi, this.keyId, this.verifyRequest, this.batchVerifyRequest));
             result.setSuccessful(true);
         } catch (ApiException e) {
             LOGGER.log(Level.INFO, "failure in verifying signature : " + e.getMessage(), e);

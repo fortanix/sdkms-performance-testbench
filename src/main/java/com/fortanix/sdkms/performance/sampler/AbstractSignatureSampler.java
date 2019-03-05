@@ -32,6 +32,8 @@ public abstract class AbstractSignatureSampler extends AbstractSDKMSSamplerClien
     String keyId;
     SignAndVerifyApi signAndVerifyApi;
     SignRequest signRequest;
+    SignRequestEx signRequestEx;
+    BatchSignRequest batchSignRequest;
     byte[] hash;
     private SecurityObjectsApi securityObjectsApi;
 
@@ -40,6 +42,8 @@ public abstract class AbstractSignatureSampler extends AbstractSDKMSSamplerClien
         String algorithm = context.getParameter(ALGORITHM, "RSA");
         String keySize = context.getParameter(KEY_SIZE, "1024");
         String filePath = context.getParameter(FILE_PATH);
+        int batchSize = context.getIntParameter(BATCH_SIZE, 0);
+
         ObjectType objectType = ObjectType.fromValue(algorithm);
         String input = "random-text";
         if (StringUtils.isNotEmpty(filePath)) {
@@ -73,6 +77,13 @@ public abstract class AbstractSignatureSampler extends AbstractSDKMSSamplerClien
             throw new ProviderException(e.getMessage());
         }
         this.signRequest = new SignRequest().hashAlg(HASH_ALGORITHM).hash(this.hash);
+        this.signRequestEx = new SignRequestEx().hashAlg(HASH_ALGORITHM).hash(this.hash).key(new SobjectDescriptor().kid(this.keyId));
+        if (batchSize != 0){
+            this.batchSignRequest = new BatchSignRequest();
+            for ( int i = 0; i < batchSize ; i++ ) {
+                this.batchSignRequest.add(this.signRequestEx);
+            }
+        }
         this.signAndVerifyApi = new SignAndVerifyApi(this.apiClient);
     }
 
