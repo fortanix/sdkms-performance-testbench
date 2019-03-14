@@ -24,6 +24,7 @@ import java.nio.file.Paths;
 import java.security.ProviderException;
 import java.util.UUID;
 import java.util.logging.Level;
+import java.util.Arrays;
 
 import static com.fortanix.sdkms.performance.sampler.Constants.*;
 
@@ -43,6 +44,9 @@ public abstract class AbstractEncryptionAndDecryptionSampler extends AbstractSDK
         String filePath = context.getParameter(FILE_PATH);
         ObjectType objectType = ObjectType.fromValue(algorithm);
         String input = "random-text";
+        if(CryptMode.fromValue(mode) == CryptMode.FPE) {
+            input = "36088650107272";
+        }
         if (StringUtils.isNotEmpty(filePath)) {
             try {
                 input = new String(Files.readAllBytes(Paths.get(filePath)));
@@ -54,6 +58,12 @@ public abstract class AbstractEncryptionAndDecryptionSampler extends AbstractSDK
         super.setupTest(context);
         this.securityObjectsApi = new SecurityObjectsApi(this.apiClient);
         SobjectRequest sobjectRequest = new SobjectRequest().name(UUID.randomUUID().toString()).objType(objectType).keySize(keySize);
+        if(CryptMode.fromValue(mode) == CryptMode.FPE) {
+            // Standard fpe policy for Credit Card datatype has been fixed here.
+            // TODO: To support more datatypes as input parameter.
+            FpeOptions fpeOptions = new FpeOptions().radix(10).preserve(Arrays.asList(0,1,2,3,-1,-2,-3,-4)).luhnCheck(true).name("Credit Card");
+            sobjectRequest.fpe(fpeOptions);
+        }
         try {
             this.keyId = this.securityObjectsApi.generateSecurityObject(sobjectRequest).getKid();
         } catch (ApiException e) {
