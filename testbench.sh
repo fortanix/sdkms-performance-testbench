@@ -259,7 +259,7 @@ function clean_task() {
 function keygen_task() {
     if [ "$1" == "${HELP}" ];
     then
-        echo "keygen captures metrics for RSA,EC,AES,DES and DES3 key Creation"
+        echo "keygen captures metrics for RSA,EC,AES,DES,DES3 and Tokenization key Creation"
         echo "   usage:"
         echo "   # ${SCRIPT_NAME} run keygen [--algorithm RSA|AES|EC|DES|DES3] [--keysize 1024|2048] [--transient true|false] [--threadcount 50|100] [--time 300|600]"
         echo "   options:"
@@ -295,7 +295,7 @@ function keygen_task() {
 function encryption_task() {
     if [ "$1" == "${HELP}" ];
     then
-        echo "encryption captures metrics for RSA,DES,DES3 and AES key Encryption"
+        echo "encryption captures metrics for RSA,DES,DES3,AES and Tokenization key Encryption"
         echo "   usage:"
         echo "   # ${SCRIPT_NAME} run encryption [--algorithm RSA|AES|DES|DES3] [--keysize 1024|2048] [--mode CBC] [--filepath </path/to/file>] [--threadcount 50|100] [--time 300|600]"
         echo "   options:"
@@ -304,7 +304,7 @@ function encryption_task() {
         echo "   --keysize      keysize for the provided algorithm."
         echo "                  Supported keysize RSA: '1024 to 8192', AES: '128, 192, or 256', DES: 56 and DES3: 168."
         echo "                  default value is 1024."
-        echo "   --mode         [Optional] encryption mode, only for AES algorithm. Values: ECB, CBC, CBCNOPAD, CFB, CTR, GCM, CCM"
+        echo "   --mode         [Optional] encryption mode, only for AES algorithm. Values: ECB, CBC, CBCNOPAD, CFB, CTR, GCM, CCM, FPE"
         echo "                  Default value is CBC."
         echo "   --filepath     Input plain text file to use for encryption. By default a random string is used"
         echo "   --threadcount  Number of concurrent threads per second to be executed."
@@ -329,7 +329,7 @@ function encryption_task() {
 function decryption_task() {
     if [ "$1" == "${HELP}" ];
     then
-        echo "decryption captures metrics for RSA,DES,DES3 and AES key Decryption"
+        echo "decryption captures metrics for RSA,DES,DES3,AES and Tokenization key Decryption"
         echo "   usage:"
         echo "   # ${SCRIPT_NAME} run decryption [--algorithm RSA|AES|DES|DES3] [--keysize 1024|2048] [--mode CBC] [--filepath </path/to/file>] [--threadcount 50|100] [--time 300|600]"
         echo "   options:"
@@ -338,7 +338,7 @@ function decryption_task() {
         echo "   --keysize      keysize for the provided algorithm."
         echo "                  Supported keysize RSA: '1024 to 8192', AES: '128, 192, or 256', DES: 56 and DES3: 168."
         echo "                  default value is 1024."
-        echo "   --mode         [Optional] encryption mode, only for AES algorithm. Values: ECB, CBC, CBCNOPAD, CFB, CTR, GCM, CCM"
+        echo "   --mode         [Optional] encryption mode, only for AES algorithm. Values: ECB, CBC, CBCNOPAD, CFB, CTR, GCM, CCM, FPE"
         echo "                  Default value is CBC."
         echo "   --filepath     Input plain text file, the cipher of which to be used for decryption. By default a random string is used"
         echo "   --threadcount  Number of concurrent threads per second to be executed."

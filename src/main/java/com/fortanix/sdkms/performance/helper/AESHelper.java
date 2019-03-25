@@ -43,7 +43,11 @@ public class AESHelper extends EncryptionDecryptionHelper {
         input.write(plain.getBytes(), 0, plain.length());
         PKCS5Padding padding = new PKCS5Padding(AES_BLOCK_SIZE);
         padding.pad(input);
-        return new EncryptRequestEx().key(key).alg(this.algorithm).plain(input.toByteArray()).mode(this.mode).iv(this.iv).ad(this.ad).tagLen(this.tagLen);
+        EncryptRequestEx encryptRequest = new EncryptRequestEx().key(key).alg(this.algorithm).plain(input.toByteArray()).mode(this.mode).ad(this.ad).tagLen(this.tagLen);
+        if(mode != CryptMode.FPE) {
+            encryptRequest.iv(this.iv);
+        }
+        return encryptRequest;
     }
 
     @Override
@@ -60,6 +64,10 @@ public class AESHelper extends EncryptionDecryptionHelper {
             System.arraycopy(cipher, tagLengthInByte, temp, 0, temp.length);
             cipher = temp;
         }
-        return new DecryptRequestEx().key(key).alg(this.algorithm).cipher(cipher).mode(this.mode).iv(this.iv).ad(this.ad).tag(tag);
+        DecryptRequestEx decryptRequest = new DecryptRequestEx().key(key).alg(this.algorithm).cipher(cipher).mode(this.mode).ad(this.ad).tag(tag);
+        if(mode != CryptMode.FPE) {
+            decryptRequest.iv(this.iv);
+        }
+        return decryptRequest;
     }
 }
