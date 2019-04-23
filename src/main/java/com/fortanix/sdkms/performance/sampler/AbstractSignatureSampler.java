@@ -8,6 +8,7 @@
 
 package com.fortanix.sdkms.performance.sampler;
 
+import com.fortanix.sdkms.jce.provider.SdkmsJCE;
 import com.fortanix.sdkms.v1.ApiException;
 import com.fortanix.sdkms.v1.api.SecurityObjectsApi;
 import com.fortanix.sdkms.v1.api.SignAndVerifyApi;
@@ -20,6 +21,9 @@ import org.apache.jmeter.protocol.java.sampler.JavaSamplerContext;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.ProviderException;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -42,11 +46,13 @@ public abstract class AbstractSignatureSampler extends AbstractSDKMSSamplerClien
         String keySize = context.getParameter(KEY_SIZE, "1024");
         String filePath = context.getParameter(FILE_PATH);
         int batchSize = context.getIntParameter(BATCH_SIZE, 0);
-        String hashAlorithm = context.getParameter(HASH_ALGORITHM);
-        DigestAlgorithm digestAlgorithm = DigestAlgorithm.fromValue(hashAlorithm.toUpperCase());
-        if (digestAlgorithm == null) {
+        String inputDigestAlgorithm = context.getParameter(HASH_ALGORITHM).toUpperCase();
+        DigestAlgorithm digestAlgorithm = null;
+        if (inputDigestAlgorithm.contains("-"))
+            digestAlgorithm = DigestAlgorithm.fromValue(inputDigestAlgorithm.replace("-", ""));
+
+        if (digestAlgorithm == null)
             digestAlgorithm = DigestAlgorithm.SHA1;
-        }
 
         ObjectType objectType = ObjectType.fromValue(algorithm);
         String input = "random-text";
@@ -59,6 +65,16 @@ public abstract class AbstractSignatureSampler extends AbstractSDKMSSamplerClien
             }
         }
 
+        MessageDigest md = null;
+        try {
+            md = MessageDigest.getInstance(inputDigestAlgorithm);
+
+        } catch (NoSuchAlgorithmException e) {
+            // suppressed
+        }
+
+        md.update(input.getBytes());
+        this.hash = md.digest();
         super.setupTest(context);
         this.securityObjectsApi = new SecurityObjectsApi(this.apiClient);
         SobjectRequest sobjectRequest = new SobjectRequest().name(UUID.randomUUID().toString()).objType(objectType);
@@ -74,7 +90,7 @@ public abstract class AbstractSignatureSampler extends AbstractSDKMSSamplerClien
             throw new ProviderException(e.getMessage());
         }
         this.signRequest = new SignRequest().hashAlg(digestAlgorithm).hash(this.hash);
-        this.signRequestEx = new SignRequestEx().hashAlg(digestAlgorithm).data(input.getBytes()).key(new SobjectDescriptor().kid(this.keyId));
+        this.signRequestEx = new SignRequestEx().hashAlg(digestAlgorithm).hash(this.hash).key(new SobjectDescriptor().kid(this.keyId));
         if (batchSize != 0){
             this.batchSignRequest = new BatchSignRequest();
             for ( int i = 0; i < batchSize ; i++ ) {

@@ -30,8 +30,7 @@ public class SignatureVerificationSampler extends AbstractSignatureSampler {
     public void setupTest(JavaSamplerContext context) {
         super.setupTest(context);
         byte[] signature;
-        String hashAlorithm = context.getParameter(HASH_ALGORITHM);
-        DigestAlgorithm digestAlgorithm = DigestAlgorithm.fromValue(hashAlorithm);
+        DigestAlgorithm digestAlgorithm = DigestAlgorithm.fromValue(context.getParameter(HASH_ALGORITHM).toUpperCase());
         if (digestAlgorithm == null) {
             digestAlgorithm = DigestAlgorithm.SHA1;
         }
