@@ -46,13 +46,10 @@ public abstract class AbstractSignatureSampler extends AbstractSDKMSSamplerClien
         String keySize = context.getParameter(KEY_SIZE, "1024");
         String filePath = context.getParameter(FILE_PATH);
         int batchSize = context.getIntParameter(BATCH_SIZE, 0);
-        String inputDigestAlgorithm = context.getParameter(HASH_ALGORITHM).toUpperCase();
+        String inputDigestAlgorithm = context.getParameter(HASH_ALGORITHM, DigestAlgorithm.SHA1.toString()).toUpperCase();
         DigestAlgorithm digestAlgorithm = null;
         if (inputDigestAlgorithm.contains("-"))
             digestAlgorithm = DigestAlgorithm.fromValue(inputDigestAlgorithm.replace("-", ""));
-
-        if (digestAlgorithm == null)
-            digestAlgorithm = DigestAlgorithm.SHA1;
 
         ObjectType objectType = ObjectType.fromValue(algorithm);
         String input = "random-text";
@@ -68,7 +65,6 @@ public abstract class AbstractSignatureSampler extends AbstractSDKMSSamplerClien
         MessageDigest md = null;
         try {
             md = MessageDigest.getInstance(inputDigestAlgorithm);
-
         } catch (NoSuchAlgorithmException e) {
             // suppressed
         }
