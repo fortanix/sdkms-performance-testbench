@@ -8,22 +8,18 @@
 
 package com.fortanix.sdkms.performance.sampler;
 
-import com.fortanix.sdkms.jce.provider.SdkmsJCE;
 import com.fortanix.sdkms.v1.ApiException;
+import com.fortanix.sdkms.v1.api.DigestApi;
 import com.fortanix.sdkms.v1.api.SecurityObjectsApi;
 import com.fortanix.sdkms.v1.api.SignAndVerifyApi;
 import com.fortanix.sdkms.v1.model.DigestAlgorithm;
 import com.fortanix.sdkms.v1.model.*;
-import com.rometools.utils.Strings;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jmeter.protocol.java.sampler.JavaSamplerContext;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.security.ProviderException;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -46,11 +42,8 @@ public abstract class AbstractSignatureSampler extends AbstractSDKMSSamplerClien
         String keySize = context.getParameter(KEY_SIZE, "1024");
         String filePath = context.getParameter(FILE_PATH);
         int batchSize = context.getIntParameter(BATCH_SIZE, 0);
-        String inputDigestAlgorithm = context.getParameter(HASH_ALGORITHM, DigestAlgorithm.SHA1.toString()).toUpperCase();
-        DigestAlgorithm digestAlgorithm = null;
-        if (inputDigestAlgorithm.contains("-"))
-            digestAlgorithm = DigestAlgorithm.fromValue(inputDigestAlgorithm.replace("-", ""));
-
+        String inputDigestAlgorithm = context.getParameter(HASH_ALGORITHM, "SHA1").toUpperCase();
+        DigestAlgorithm digestAlgorithm = DigestAlgorithm.fromValue(inputDigestAlgorithm);
         ObjectType objectType = ObjectType.fromValue(algorithm);
         String input = "random-text";
         if (StringUtils.isNotEmpty(filePath)) {
@@ -61,17 +54,19 @@ public abstract class AbstractSignatureSampler extends AbstractSDKMSSamplerClien
                 throw new ProviderException(e.getMessage());
             }
         }
-
-        MessageDigest md = null;
-        try {
-            md = MessageDigest.getInstance(inputDigestAlgorithm);
-        } catch (NoSuchAlgorithmException e) {
-            // suppressed
-        }
-
-        md.update(input.getBytes());
-        this.hash = md.digest();
         super.setupTest(context);
+
+        DigestResponse digestResponse = new DigestResponse();
+        DigestRequest digestRequest = new DigestRequest()
+                .data(input.getBytes())
+                .alg(digestAlgorithm);
+        DigestApi digestApi = new DigestApi(this.apiClient);
+        try {
+            digestResponse = digestApi.computeDigest(digestRequest);
+        } catch (ApiException e) {
+            LOGGER.log(Level.INFO, "Error occur while computing digest " + e);
+        }
+        this.hash = digestResponse.getDigest();
         this.securityObjectsApi = new SecurityObjectsApi(this.apiClient);
         SobjectRequest sobjectRequest = new SobjectRequest().name(UUID.randomUUID().toString()).objType(objectType);
         if (objectType == ObjectType.EC) {
