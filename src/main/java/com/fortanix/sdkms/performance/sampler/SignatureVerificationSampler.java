@@ -18,6 +18,8 @@ import java.security.ProviderException;
 import java.util.logging.Level;
 import java.util.ArrayList;
 
+import static com.fortanix.sdkms.performance.sampler.Constants.HASH_ALGORITHM;
+
 public class SignatureVerificationSampler extends AbstractSignatureSampler {
 
     private VerifyRequest verifyRequest;
@@ -28,14 +30,19 @@ public class SignatureVerificationSampler extends AbstractSignatureSampler {
     public void setupTest(JavaSamplerContext context) {
         super.setupTest(context);
         byte[] signature;
+        DigestAlgorithm digestAlgorithm = DigestAlgorithm.fromValue(context.getParameter(HASH_ALGORITHM).toUpperCase());
+        if (digestAlgorithm == null) {
+            digestAlgorithm = DigestAlgorithm.SHA1;
+        }
+
         try {
             signature = this.signAndVerifyApi.sign(this.keyId, this.signRequest).getSignature();
         } catch (ApiException e) {
             LOGGER.log(Level.INFO, "failure in generating signature : " + e.getMessage(), e);
             throw new ProviderException(e.getMessage());
         }
-        this.verifyRequest = new VerifyRequest().hashAlg(HASH_ALGORITHM).hash(this.hash).signature(signature);
-        this.verifyRequestEx = new VerifyRequestEx().hashAlg(HASH_ALGORITHM).hash(this.hash).key(new SobjectDescriptor().kid(this.keyId)).signature(signature);
+        this.verifyRequest = new VerifyRequest().hashAlg(digestAlgorithm).hash(this.hash).signature(signature);
+        this.verifyRequestEx = new VerifyRequestEx().hashAlg(digestAlgorithm).hash(this.hash).key(new SobjectDescriptor().kid(this.keyId)).signature(signature);
         if (this.batchSignRequest.size() != 0){
             this.batchVerifyRequest = new BatchVerifyRequest();
             for ( int i = 0; i < this.batchSignRequest.size() ; i++ ) {

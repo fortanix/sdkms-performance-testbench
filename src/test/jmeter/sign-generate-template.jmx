@@ -46,6 +46,11 @@
                 <stringProp name="Argument.value">##batchSize##</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
+              <elementProp name="hashAlgorithm" elementType="Argument">
+                <stringProp name="Argument.name">hashAlgorithm</stringProp>
+                <stringProp name="Argument.value">##HashAlgorithm##</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
             </collectionProp>
           </elementProp>
           <stringProp name="classname">com.fortanix.sdkms.performance.sampler.SignatureGenerationSampler</stringProp>
