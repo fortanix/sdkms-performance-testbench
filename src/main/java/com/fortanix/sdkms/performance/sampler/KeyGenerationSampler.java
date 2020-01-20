@@ -23,6 +23,9 @@ import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
 
+import java.sql.Timestamp;
+import org.apache.jmeter.threads.JMeterContextService;
+
 import static com.fortanix.sdkms.performance.sampler.Constants.*;
 
 public class KeyGenerationSampler extends AbstractSDKMSSamplerClient {
@@ -79,9 +82,21 @@ public class KeyGenerationSampler extends AbstractSDKMSSamplerClient {
 
     @Override
     public void teardownTest(JavaSamplerContext context) {
+        this.login(); /* Forcefully re-authenticates thread in case the idle-timeout has kicked
+                         in and expires the session */
+
         for (String keyId : keyIds) {
             try {
                 this.securityObjectsApi.deleteSecurityObject(keyId);
+
+                /* Adding a logging statement that prints the key being deleted, at random intervals
+                   to give the User a sense of progress */
+
+                Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+
+                if (((timestamp.getTime() - JMeterContextService.getTestStartTime())/5) % 9 == 0)
+                    LOGGER.log(Level.INFO, "Deleted key : " + keyId);
+
             } catch (ApiException e) {
                 LOGGER.log(Level.INFO, "failure in deleting key : " + e.getMessage(), e);
             }

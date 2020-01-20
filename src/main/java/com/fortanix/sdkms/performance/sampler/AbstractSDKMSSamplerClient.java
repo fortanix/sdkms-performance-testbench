@@ -31,7 +31,7 @@ public abstract class AbstractSDKMSSamplerClient extends AbstractJavaSamplerClie
     ApiClient apiClient;
     private AuthenticationApi authenticationApi;
 
-    private void login() {
+    public void login() {
         AuthResponse authResponse = null;
         try {
             authResponse = this.authenticationApi.authorize();
