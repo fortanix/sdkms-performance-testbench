@@ -79,9 +79,19 @@ public class KeyGenerationSampler extends AbstractSDKMSSamplerClient {
 
     @Override
     public void teardownTest(JavaSamplerContext context) {
-        for (String keyId : keyIds) {
+        this.login(); /* Forcefully re-authenticates thread in case the idle-timeout has kicked
+                         in and expires the session */
+
+        for (int idx = 0; idx < keyIds.size(); idx++){
             try {
-                this.securityObjectsApi.deleteSecurityObject(keyId);
+                this.securityObjectsApi.deleteSecurityObject(keyIds.get(idx));
+
+                /* Adding a logging statement that prints the key being deleted, for every 100 keys -
+                   to give the User a sense of progress */
+
+                if(idx % 100 == 0)
+                    LOGGER.log(Level.INFO, "Deleted key : " + keyIds.get(idx));
+
             } catch (ApiException e) {
                 LOGGER.log(Level.INFO, "failure in deleting key : " + e.getMessage(), e);
             }
