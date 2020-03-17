@@ -10,8 +10,7 @@ package com.fortanix.sdkms.performance.sampler;
 
 import com.fortanix.sdkms.v1.ApiException;
 import com.fortanix.sdkms.v1.api.EncryptionAndDecryptionApi;
-import com.fortanix.sdkms.v1.model.DecryptRequestEx;
-import com.fortanix.sdkms.v1.model.SobjectDescriptor;
+import com.fortanix.sdkms.v1.model.*;
 import org.apache.jmeter.protocol.java.sampler.JavaSamplerContext;
 import org.apache.jmeter.samplers.SampleResult;
 
@@ -20,19 +19,28 @@ import java.util.logging.Level;
 
 public class DecryptionSampler extends AbstractEncryptionAndDecryptionSampler {
 
-    DecryptRequestEx decryptRequest;
+    DecryptRequest decryptRequest;
+    DecryptRequestEx decryptRequestEx;
+    BatchDecryptRequest batchDecryptRequest;
+    BatchDecryptRequestInner batchDecryptRequestInners;
 
     @Override
     public void setupTest(JavaSamplerContext context) {
         super.setupTest(context);
         byte[] cipher;
         try {
-            cipher = this.encryptionAndDecryptionApi.encryptEx(this.encryptRequest).getCipher();
+            cipher = this.encryptionAndDecryptionApi.encryptEx(this.encryptRequestEx).getCipher();
         } catch (ApiException e) {
             LOGGER.log(Level.INFO, "failure in encrypting : " + e.getMessage(), e);
             throw new ProviderException(e.getMessage());
         }
-        this.decryptRequest = this.encryptionDecryptionHelper.createDecryptRequest(new SobjectDescriptor().kid(this.keyId), cipher);
+        this.decryptRequestEx = this.encryptionDecryptionHelper.createDecryptRequest(new SobjectDescriptor().kid(this.keyId), cipher);
+        if (this.batchEncryptRequest.size() != 0){
+            this.batchDecryptRequest = new BatchDecryptRequest();
+            for ( int i = 0; i < this.batchEncryptRequest.size() ; i++ ) {
+                this.batchDecryptRequest.add(this.batchDecryptRequestInners);
+            }
+        }
     }
 
     @Override
@@ -43,18 +51,24 @@ public class DecryptionSampler extends AbstractEncryptionAndDecryptionSampler {
             retryOperationIfSessionExpires(new RetryableOperation() {
                 EncryptionAndDecryptionApi encryptionAndDecryptionApi;
                 DecryptRequestEx decryptRequest;
+                BatchDecryptRequest batchDecryptRequest;
 
-                RetryableOperation init(EncryptionAndDecryptionApi encryptionAndDecryptionApi, DecryptRequestEx decryptRequest) {
+                RetryableOperation init(EncryptionAndDecryptionApi encryptionAndDecryptionApi, DecryptRequestEx decryptRequest, BatchDecryptRequest batchDecryptRequest) {
                     this.encryptionAndDecryptionApi = encryptionAndDecryptionApi;
                     this.decryptRequest = decryptRequest;
+                    this.batchDecryptRequest = batchDecryptRequest;
                     return this;
                 }
 
                 @Override
                 public Object execute() throws ApiException {
-                    return this.encryptionAndDecryptionApi.decryptEx(this.decryptRequest);
+                    if (this.batchDecryptRequest == null) {
+                        return this.encryptionAndDecryptionApi.decryptEx(this.decryptRequest);
+                    } else{
+                        return this.encryptionAndDecryptionApi.batchDecrypt(this.batchDecryptRequest);
+                    }
                 }
-            }.init(this.encryptionAndDecryptionApi, this.decryptRequest));
+            }.init(this.encryptionAndDecryptionApi, this.decryptRequestEx, this.batchDecryptRequest));
             result.setSuccessful(true);
         } catch (ApiException e) {
             LOGGER.info("failure in decrypting : " + e.getMessage());
