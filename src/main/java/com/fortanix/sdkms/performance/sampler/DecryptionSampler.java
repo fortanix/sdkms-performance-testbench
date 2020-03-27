@@ -26,13 +26,15 @@ public class DecryptionSampler extends AbstractEncryptionAndDecryptionSampler {
     public void setupTest(JavaSamplerContext context) {
         super.setupTest(context);
         byte[] cipher;
+        byte[] tag;
         try {
             cipher = this.encryptionAndDecryptionApi.encryptEx(this.encryptRequest).getCipher();
+            tag = this.encryptionAndDecryptionApi.encryptEx(this.encryptRequest).getTag();
         } catch (ApiException e) {
             LOGGER.log(Level.INFO, "failure in encrypting : " + e.getMessage(), e);
             throw new ProviderException(e.getMessage());
         }
-        this.decryptRequest = this.encryptionDecryptionHelper.createDecryptRequest(new SobjectDescriptor().kid(this.keyId), cipher);
+        this.decryptRequest = this.encryptionDecryptionHelper.createDecryptRequest(new SobjectDescriptor().kid(this.keyId), cipher, tag);
     }
 
     @Override

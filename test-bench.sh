@@ -490,7 +490,7 @@ function mac_verify_task() {
     OPERATION=MAC_VERIFY
     validate
     get_input ${@:1}
-    update_jmx "/src/test/jmeter/mac-sign-verify-template.jmx" "/target/jmx/"$FILE_NAME".jmx"
+    update_jmx "/src/test/jmeter/mac-verify-template.jmx" "/target/jmx/"$FILE_NAME".jmx"
     print_start
     mvn verify -Djmx.path="target/jmx" $JVM_ARGS
     print_end $FILE_NAME $OPERATION
