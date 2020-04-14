@@ -29,7 +29,7 @@ public class EncryptionDecryptionHelper {
         return new EncryptRequestEx().key(key).alg(this.algorithm).plain(plainText.getBytes()).mode(this.mode).iv(this.iv).ad(this.ad).tagLen(this.tagLen);
     }
 
-    public DecryptRequestEx createDecryptRequest(SobjectDescriptor key, byte[] cipher, byte[] tag) {
-        return new DecryptRequestEx().key(key).alg(this.algorithm).cipher(cipher).mode(this.mode).iv(this.iv).ad(this.ad).tag(tag);
+    public DecryptRequestEx createDecryptRequest(SobjectDescriptor key, byte[] cipher, byte[] tag, byte[] iv) {
+        return new DecryptRequestEx().key(key).alg(this.algorithm).cipher(cipher).mode(this.mode).ad(this.ad).tag(tag).iv(iv);
     }
 }
