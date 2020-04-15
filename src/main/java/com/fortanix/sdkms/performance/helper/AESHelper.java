@@ -52,10 +52,6 @@ public class AESHelper extends EncryptionDecryptionHelper {
 
     @Override
     public DecryptRequestEx createDecryptRequest(SobjectDescriptor key, byte[] cipher, byte[] tag, byte[] iv) {
-        DecryptRequestEx decryptRequest = new DecryptRequestEx().key(key).alg(this.algorithm).cipher(cipher).mode(this.mode).ad(this.ad).tag(tag).iv(iv);
-        if(mode != CryptMode.FPE) {
-            decryptRequest.iv(this.iv);
-        }
-        return decryptRequest;
+        return new DecryptRequestEx().key(key).alg(this.algorithm).cipher(cipher).mode(this.mode).ad(this.ad).tag(tag).iv(iv);
     }
 }
