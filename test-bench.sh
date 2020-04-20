@@ -49,6 +49,7 @@ DATA_LENGTH=""
 BATCH_SIZE=""
 JVM_ARGS_INPUT=""
 JVM_ARGS=""
+FILE_IDF=""
 
 #Function to update jmx text using value
 function update_jmx(){
@@ -118,22 +119,22 @@ while [ $# -gt 0 ]; do
     --keysize)
       KEYSIZE="$2"
       ;;
-   --threadcount)
+    --threadcount)
       THREAD_COUNT="$2"
       ;;
-   --time)
+    --time)
       EXECUTION_TIME="$2"
       ;;
-   --transient)
+    --transient)
       TRANSIENT="$2"
       ;;
-   --filepath)
+    --filepath)
       FILEPATH="$2"
       ;;
     --hash-algorithm)
       HASH_ALGORITHM="$2"
       ;;
-   --mode)
+    --mode)
       MODE="$2"
       ;;
     --max-file)
@@ -160,6 +161,9 @@ while [ $# -gt 0 ]; do
     --jvm-args)
       JVM_ARGS_INPUT="$2"
       ;;
+	--file-idf)
+      FILE_IDF="$2"
+      ;;
       *)
   esac
   shift
@@ -184,9 +188,9 @@ function print_end(){
     CSV_OUTPUT_FILE=$(ls -td -- $SDKMS_REST_API_HOME"/target/jmeter/results/"* | head -n 1)
     if [ -z "$BATCH_SIZE" ]
     then
-        AGGREGATE_OUTPUT_FILE=$SDKMS_REST_API_HOME"/target/jmeter/results/"$2"-"$ALGORITHM"-"$KEYSIZE"-"$THREAD_COUNT"THREADS-"$EXECUTION_TIME"SECONDS-AGGREGATE.csv"
+        AGGREGATE_OUTPUT_FILE=$SDKMS_REST_API_HOME"/target/jmeter/results/"$2"-"$ALGORITHM"-"$KEYSIZE"-"$THREAD_COUNT"THREADS-"$EXECUTION_TIME"SECONDS-"$FILE_IDF"-AGGREGATE.csv"
     else
-        AGGREGATE_OUTPUT_FILE=$SDKMS_REST_API_HOME"/target/jmeter/results/"BATCH""$2"-"$ALGORITHM"-"$KEYSIZE"-"$THREAD_COUNT"THREADS-"$EXECUTION_TIME"SECONDS-BATCHSIZE-"$BATCH_SIZE"-AGGREGATE.csv"
+        AGGREGATE_OUTPUT_FILE=$SDKMS_REST_API_HOME"/target/jmeter/results/"BATCH""$2"-"$ALGORITHM"-"$KEYSIZE"-"$THREAD_COUNT"THREADS-"$EXECUTION_TIME"SECONDS-BATCHSIZE-"$BATCH_SIZE"-"$FILE_IDF"-AGGREGATE.csv"
     fi
     java -jar $SDKMS_REST_API_HOME"/target/jmeter/lib/ext/cmdrunner-2.0.jar" --tool Reporter --generate-csv $AGGREGATE_OUTPUT_FILE --input-jtl $CSV_OUTPUT_FILE --plugin-type AggregateReport
 
@@ -197,11 +201,16 @@ function print_end(){
        OPERATIONS=$(awk -F, 'NR>2 { print $2 ; }' $AGGREGATE_OUTPUT_FILE)
        BANDWIDTH=$(($(($OPERATIONS*$FILE_SIZE)) / $((1024*$EXECUTION_TIME))))
     fi
+	
+	OP_NAME=$AGGREGATE_OUTPUT_FILE
+	TRIM_PATTERN="-AGGREGATE.csv"
+	OP_NAME=${AGGREGATE_OUTPUT_FILE/$TRIM_PATTERN/}
+	OP_NAME=$(echo $OP_NAME | awk -F "/" '{print $NF}')
 
-    awk -v THREADS="$THREAD_COUNT" -v CAPACITY="$BANDWIDTH"  -v TIME="$EXECUTION_TIME" 'BEGIN { FS=","; OFS="," }; FNR == 1 { print "operation","threads","duration(sec)","total operations","average latency(ms)","p90 latency(ms)","p99 latency(ms)","min latency (ms)","max latency (ms)","Error %","Throughput per sec","Cipher capacity (kb/s)" }; FNR  > 1 { print $1,THREADS,TIME,$2,$3,$5,$7,$8,$9,$10,$11,CAPACITY }' $AGGREGATE_OUTPUT_FILE > temp.csv && mv temp.csv $AGGREGATE_OUTPUT_FILE;
+    awk -v THREADS="$THREAD_COUNT" -v CAPACITY="$BANDWIDTH" -v TIME="$EXECUTION_TIME" -v OP_NAME="$OP_NAME" 'BEGIN { FS=","; OFS="," }; FNR == 1 { print "operation","threads","duration(sec)","total operations","average latency(ms)","p90 latency(ms)","p99 latency(ms)","min latency (ms)","max latency (ms)","Error %","Throughput per sec","Cipher capacity (kb/s)" }; FNR  > 1 { print OP_NAME,THREADS,TIME,$2,$3,$5,$7,$8,$9,$10,$11,CAPACITY }' $AGGREGATE_OUTPUT_FILE > temp.csv && mv temp.csv $AGGREGATE_OUTPUT_FILE;
 
-    mv $HTML_OUTPUT_DIR $SDKMS_REST_API_HOME"/target/jmeter/reports/"$2"-"$ALGORITHM"-"$KEYSIZE"-"$THREAD_COUNT"THREADS-"$EXECUTION_TIME"SECONDS-HTML"
-    mv $CSV_OUTPUT_FILE $SDKMS_REST_API_HOME"/target/jmeter/results/"$2"-"$ALGORITHM"-"$KEYSIZE"-"$THREAD_COUNT"THREADS-"$EXECUTION_TIME"SECONDS-DATA.csv"
+    mv $HTML_OUTPUT_DIR $SDKMS_REST_API_HOME"/target/jmeter/reports/"$2"-"$ALGORITHM"-"$KEYSIZE"-"$THREAD_COUNT"THREADS-"$EXECUTION_TIME"SECONDS-"$FILE_IDF"-HTML"
+    mv $CSV_OUTPUT_FILE $SDKMS_REST_API_HOME"/target/jmeter/results/"$2"-"$ALGORITHM"-"$KEYSIZE"-"$THREAD_COUNT"THREADS-"$EXECUTION_TIME"SECONDS-"$FILE_IDF"-DATA.csv"
     info "Html output can be found at "$HTML_OUTPUT_DIR"/index.html"
     info "csv output can be found at "$AGGREGATE_OUTPUT_FILE
 }
@@ -583,17 +592,17 @@ function merge_task(){
 
     info "Operation: merge"
     if [ -z "${2}" ]; then
-      file_list=$( ls "${TARGET}/jmeter/results/"*AGGREGATE.csv 2> /dev/null )
+      file_list=$( ls "${SDKMS_REST_API_HOME}/target/jmeter/results/"*AGGREGATE.csv 2> /dev/null )
     else
       IFS=',' read -r -a file_list <<< "$2"
     fi
     # check file_list is empty
-    if [ -z "${file_list}" ]; then
-        error "No aggergated csv file found"
+    if [ -z "$file_list" ]; then
+        error "No aggregated csv files found"
         return ${ERROR}
     fi
     current_time=$(date "+%Y.%m.%d-%H.%M.%S")
-    out_file="${TARGET}/jmeter/results/MergeOutput-${current_time}.csv"
+    out_file="${SDKMS_REST_API_HOME}/target/jmeter/results/MergeOutput-${current_time}.csv"
     i=0                                       # Reset a counter
     for filename in ${file_list[@]}; do
     if [ "$filename"  != "${out_file}" ] ;      # Avoid recursion
@@ -606,6 +615,7 @@ function merge_task(){
     fi
     done
     awk -F, '$1!="TOTAL"' ${out_file} > temp.csv && mv temp.csv ${out_file}
+	info "All files have been merged successfully!"
 }
 
 opt=$(tb_operation $@)
