@@ -16,7 +16,9 @@ import com.fortanix.sdkms.v1.model.ObjectType;
 import com.fortanix.sdkms.v1.model.SobjectRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jmeter.protocol.java.sampler.JavaSamplerContext;
+import org.apache.jmeter.threads.JMeterContext;
 import org.apache.jmeter.samplers.SampleResult;
+import org.apache.jmeter.threads.JMeterContextService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +31,8 @@ public class KeyGenerationSampler extends AbstractSDKMSSamplerClient {
 
     private SecurityObjectsApi securityObjectsApi;
     private List<String> keyIds = new ArrayList<>();
+    JMeterContext jmCtx = JMeterContextService.getContext();
+    int threadNum = jmCtx.getThreadNum();
 
     @Override
     public SampleResult runTest(JavaSamplerContext context) {
@@ -86,11 +90,11 @@ public class KeyGenerationSampler extends AbstractSDKMSSamplerClient {
             try {
                 this.securityObjectsApi.deleteSecurityObject(keyIds.get(idx));
 
-                /* Adding a logging statement that prints the key being deleted, for every 100 keys -
+                /* Adding a logging statement that prints a statement for every 100 keys in each thread -
                    to give the User a sense of progress */
 
-                if(idx % 100 == 0)
-                    LOGGER.log(Level.INFO, "Deleted key : " + keyIds.get(idx));
+                if(idx != 0 && idx % 100 == 0)
+                    LOGGER.log(Level.INFO, "Deleted " + idx + " keys in thread number: " + threadNum);
 
             } catch (ApiException e) {
                 LOGGER.log(Level.INFO, "failure in deleting key : " + e.getMessage(), e);
