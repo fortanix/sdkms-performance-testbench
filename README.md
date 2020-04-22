@@ -32,11 +32,11 @@ For more information on SDKMS visit [SDKMS Site](https://fortanix.com/products/s
 # Setup performance Test bench
 ## Build
 * Clone the repository or download the zip.
-* Execute.
+* Execute:
 
 	`#./test-bench.sh build`
 
-	> For more information execute
+* For more information execute:
 
 	> `#./test-bench.sh --help`
 
@@ -53,13 +53,13 @@ To delete the generated artifacts, execute below command:
 Supported key sizes are 128, 192 and 256.
 
 	Example:
-	# test-bench.sh run keygen --algorithm AES --keysize 128 --transient=true
+	# test-bench.sh run keygen --algorithm AES --keysize 128 --transient true --threadcount 5 --time 30
 
 ## RSA Key Generation
 Supported key sizes are between 1024 to 8192.
 
 	Example:
-	# test-bench.sh run keygen --algorithm RSA --keysize 1024 --transient=true
+	# test-bench.sh run keygen --algorithm RSA --keysize 1024 --transient true --threadcount 5 --time 30
 
 ## EC Key Generation
 For EC key --keysize are SecP192K1, SecP224K1, SecP256K1, NistP192, NistP224, NistP256, NistP384 and NistP521.
@@ -69,7 +69,7 @@ For EC key --keysize are SecP192K1, SecP224K1, SecP256K1, NistP192, NistP224, Ni
 
 ## AES CBC Encryption
 AES encryption is supported for all key sizes (128, 192 and 256) and
-supported modes are CBC and GCM.
+supported modes are CBC, GCM and FPE.
 
 	Example:
 	# test-bench.sh run encryption --algorithm AES --keysize 128 --mode GCM --filepath filepath
@@ -78,7 +78,7 @@ The final metrics shows sample time for encryption.
 
 ## AES CBC Decryption
 AES decryption is supported for all key sizes (128, 192 and 256) and
-supported modes are CBC and GCM.
+supported modes are CBC, GCM and FPE.
 
 	Example:
 	# test-bench.sh run decryption --algorithm AES --keysize 128 --mode GCM --filepath filepath
@@ -114,6 +114,12 @@ We can capture EC sign and verify performance metrics as below:
 	Example:
 	# test-bench.sh run sign --algorithm EC
 	# test-bench.sh run verify --algorithm EC
+	
+## Plugin Invocation
+We can capture Plugin performance metrics as below:
+
+	Example:
+	# test-bench.sh run plugin --pluginId <plugin-id> --pluginType <plugin-type> --threadcount 10 --time 120
 
 > All above operation run by default with 50 thread for 5 minutes. All above operation support --threadcount and --time to overwrite the default thread count and duration.
 
@@ -131,8 +137,9 @@ Let's assume we have cloned the repo at /opt/rest-api.
 	`/opt/rest-api/target/jmeter/results/`
 
 # Sample Output
-| operation | threads | duration(sec) | total operations | average latency(ms) | p90 latency(ms) | p99 latency(ms) | min latency (ms) | max latency (ms) | Error % | Throughput per sec | capacity (kb/s)
-| SDKMS Signature Generation | 1 | 300 | 16020 | 13 | 21 | 26 | 6 | 154 | 0.00% | 53.4 | NA
+operation | threads | duration(sec) | total operations | average latency(ms) | p90 latency(ms) | p99 latency(ms) | min latency (ms) | max latency (ms) | Error % | Throughput per sec | capacity (kb/s)
+------------ | ------------- | ------------ | ------------- | ------------ | ------------- | ------------ | ------------- | ------------ | ------------- | ------------ | -------------
+SDKMS Signature Generation | 1 | 300 | 16020 | 13 | 21 | 26 | 6 | 154 | 0.00% | 53.4 | NA
 
 * capacity columns is only supported for AES Encryption/Decryption with provided filepath.
 

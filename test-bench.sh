@@ -49,7 +49,7 @@ DATA_LENGTH=""
 BATCH_SIZE=""
 JVM_ARGS_INPUT=""
 JVM_ARGS=""
-FILE_IDF=""
+FILE_IDF=$(date +%s)
 
 #Function to update jmx text using value
 function update_jmx(){
@@ -202,10 +202,10 @@ function print_end(){
        BANDWIDTH=$(($(($OPERATIONS*$FILE_SIZE)) / $((1024*$EXECUTION_TIME))))
     fi
 	
-	OP_NAME=$AGGREGATE_OUTPUT_FILE
-	TRIM_PATTERN="-AGGREGATE.csv"
-	OP_NAME=${AGGREGATE_OUTPUT_FILE/$TRIM_PATTERN/}
-	OP_NAME=$(echo $OP_NAME | awk -F "/" '{print $NF}')
+    OP_NAME=$AGGREGATE_OUTPUT_FILE
+    TRIM_PATTERN="-AGGREGATE.csv"
+    OP_NAME=${AGGREGATE_OUTPUT_FILE/$TRIM_PATTERN/}
+    OP_NAME=$(echo $OP_NAME | awk -F "/" '{print $NF}')
 
     awk -v THREADS="$THREAD_COUNT" -v CAPACITY="$BANDWIDTH" -v TIME="$EXECUTION_TIME" -v OP_NAME="$OP_NAME" 'BEGIN { FS=","; OFS="," }; FNR == 1 { print "operation","threads","duration(sec)","total operations","average latency(ms)","p90 latency(ms)","p99 latency(ms)","min latency (ms)","max latency (ms)","Error %","Throughput per sec","Cipher capacity (kb/s)" }; FNR  > 1 { print OP_NAME,THREADS,TIME,$2,$3,$5,$7,$8,$9,$10,$11,CAPACITY }' $AGGREGATE_OUTPUT_FILE > temp.csv && mv temp.csv $AGGREGATE_OUTPUT_FILE;
 
@@ -256,7 +256,7 @@ function build_task() {
 function clean_task() {
     if [ "$1" == "${HELP}" ];
     then
-        echo " clean delets the performance artifacts and target directory."
+        echo " clean deletes the performance artifacts and target directory."
         echo "   usage:"
         echo "   # ${SCRIPT_NAME} clean"
         return
@@ -286,6 +286,9 @@ function keygen_task() {
         echo "                  default value is 50."
         echo "   --time         Time in seconds to hold the jmeter execution."
         echo "                  default value is 300."
+		echo "   --file-idf     A distinct identifier to add to the output CSV file for easy identification."
+        echo "                  helps in cases when there are multiple consecutive executions of the same operation."
+		echo "                  prevents the older CSV from getting overwritten by the new output file. Adds an epoch timestamp at the end of filename by default."
         echo ""
         echo "One can also pass proxy(http/https) related jvm args as a csv string: --jvm-args '-Dhttps.proxyHost=proxy,-Dhttps.proxyPort=8080,-Dhttps.proxyUser=user,-Dhttps.proxyPassword=pwd'"
         return
@@ -320,6 +323,9 @@ function encryption_task() {
         echo "                  default value is 50."
         echo "   --time         Time in seconds to hold the jmeter execution."
         echo "                  default value is 300."
+		echo "   --file-idf     A distinct identifier to add to the output CSV file for easy identification."
+        echo "                  helps in cases when there are multiple consecutive executions of the same operation."
+		echo "                  prevents the older CSV from getting overwritten by the new output file. Adds an epoch timestamp at the end of filename by default."
         echo ""
         echo "One can also pass proxy(http/https) related jvm args as a csv string: --jvm-args '-Dhttps.proxyHost=proxy,-Dhttps.proxyPort=8080,-Dhttps.proxyUser=user,-Dhttps.proxyPassword=pwd'"
         return
@@ -354,6 +360,9 @@ function decryption_task() {
         echo "                  default value is 50."
         echo "   --time         Time in seconds to hold the jmeter execution."
         echo "                  default value is 300."
+		echo "   --file-idf     A distinct identifier to add to the output CSV file for easy identification."
+        echo "                  helps in cases when there are multiple consecutive executions of the same operation."
+		echo "                  prevents the older CSV from getting overwritten by the new output file. Adds an epoch timestamp at the end of filename by default."
         echo ""
         echo "One can also pass proxy(http/https) related jvm args as a csv string: --jvm-args '-Dhttps.proxyHost=proxy,-Dhttps.proxyPort=8080,-Dhttps.proxyUser=user,-Dhttps.proxyPassword=pwd'"
         return
@@ -389,6 +398,9 @@ function sign_task() {
         echo "                     default value is 300."
         echo "   --batchsize       Create a batch sign request with the provided batch size."
         echo "                     Default is 0 (non batch) single sign request."
+		echo "   --file-idf        A distinct identifier to add to the output CSV file for easy identification."
+        echo "                     helps in cases when there are multiple consecutive executions of the same operation."
+		echo "                     prevents the older CSV from getting overwritten by the new output file. Adds an epoch timestamp at the end of filename by default."
         echo ""
         echo "One can also pass proxy(http/https) related jvm args as a csv string: --jvm-args '-Dhttps.proxyHost=proxy,-Dhttps.proxyPort=8080,-Dhttps.proxyUser=user,-Dhttps.proxyPassword=pwd'"
         return
@@ -424,6 +436,9 @@ function verify_task() {
         echo "                     default value is 300."
         echo "   --batchsize       Create a batch verify request with the provided batch size."
         echo "                     Default is 0 (non batch) single verify request."
+		echo "   --file-idf        A distinct identifier to add to the output CSV file for easy identification."
+        echo "                     helps in cases when there are multiple consecutive executions of the same operation."
+		echo "                     prevents the older CSV from getting overwritten by the new output file. Adds an epoch timestamp at the end of filename by default."
         echo ""
         echo "One can also pass proxy(http/https) related jvm args as a csv string: --jvm-args '-Dhttps.proxyHost=proxy,-Dhttps.proxyPort=8080,-Dhttps.proxyUser=user,-Dhttps.proxyPassword=pwd'"
         return
@@ -457,6 +472,9 @@ function mac_generate_task() {
         echo "                     default value is 50."
         echo "   --time            Time in seconds to hold the jmeter execution."
         echo "                     default value is 300."
+		echo "   --file-idf        A distinct identifier to add to the output CSV file for easy identification."
+        echo "                     helps in cases when there are multiple consecutive executions of the same operation."
+		echo "                     prevents the older CSV from getting overwritten by the new output file. Adds an epoch timestamp at the end of filename by default."
         echo ""
         echo "One can also pass proxy(http/https) related jvm args as a csv string: --jvm-args '-Dhttps.proxyHost=proxy,-Dhttps.proxyPort=8080,-Dhttps.proxyUser=user,-Dhttps.proxyPassword=pwd'"
         return
@@ -490,6 +508,9 @@ function mac_verify_task() {
         echo "                     default value is 50."
         echo "   --time            Time in seconds to hold the jmeter execution."
         echo "                     default value is 300."
+		echo "   --file-idf        A distinct identifier to add to the output CSV file for easy identification."
+        echo "                     helps in cases when there are multiple consecutive executions of the same operation."
+		echo "                     prevents the older CSV from getting overwritten by the new output file. Adds an epoch timestamp at the end of filename by default."
         echo ""
         echo "One can also pass proxy(http/https) related jvm args as a csv string: --jvm-args '-Dhttps.proxyHost=proxy,-Dhttps.proxyPort=8080,-Dhttps.proxyUser=user,-Dhttps.proxyPassword=pwd'"
         return
