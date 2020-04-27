@@ -44,7 +44,7 @@ public class AESHelper extends EncryptionDecryptionHelper {
         PKCS5Padding padding = new PKCS5Padding(AES_BLOCK_SIZE);
         padding.pad(input);
         EncryptRequestEx encryptRequest = new EncryptRequestEx().key(key).alg(this.algorithm).plain(input.toByteArray()).mode(this.mode).ad(this.ad).tagLen(this.tagLen);
-        if(mode != CryptMode.FPE) {
+        if(mode != CryptMode.FPE && mode != CryptMode.KW && mode != CryptMode.KWP) {
             encryptRequest.iv(this.iv);
         }
         return encryptRequest;
@@ -65,7 +65,7 @@ public class AESHelper extends EncryptionDecryptionHelper {
             cipher = temp;
         }
         DecryptRequestEx decryptRequest = new DecryptRequestEx().key(key).alg(this.algorithm).cipher(cipher).mode(this.mode).ad(this.ad).tag(tag);
-        if(mode != CryptMode.FPE) {
+        if(mode != CryptMode.FPE && mode != CryptMode.KW && mode != CryptMode.KWP) {
             decryptRequest.iv(this.iv);
         }
         return decryptRequest;
