@@ -51,23 +51,7 @@ public class AESHelper extends EncryptionDecryptionHelper {
     }
 
     @Override
-    public DecryptRequestEx createDecryptRequest(SobjectDescriptor key, byte[] cipher) {
-        // generate tag
-        byte[] tag = null;
-        if (mode == CryptMode.GCM || mode == CryptMode.CCM) {
-            int tagLengthInByte = AES_BLOCK_SIZE;
-            tag = new byte[tagLengthInByte];
-            byte[] temp = new byte[cipher.length - tagLengthInByte];
-            // separate out GCM tag
-            System.arraycopy(cipher, 0, tag, 0, tagLengthInByte);
-            // separate out cipher text
-            System.arraycopy(cipher, tagLengthInByte, temp, 0, temp.length);
-            cipher = temp;
-        }
-        DecryptRequestEx decryptRequest = new DecryptRequestEx().key(key).alg(this.algorithm).cipher(cipher).mode(this.mode).ad(this.ad).tag(tag);
-        if(mode != CryptMode.FPE) {
-            decryptRequest.iv(this.iv);
-        }
-        return decryptRequest;
+    public DecryptRequestEx createDecryptRequest(SobjectDescriptor key, byte[] cipher, byte[] tag, byte[] iv) {
+        return new DecryptRequestEx().key(key).alg(this.algorithm).cipher(cipher).mode(this.mode).ad(this.ad).tag(tag).iv(iv);
     }
 }
