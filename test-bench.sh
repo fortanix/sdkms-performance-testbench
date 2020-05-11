@@ -49,7 +49,7 @@ DATA_LENGTH=""
 BATCH_SIZE=""
 JVM_ARGS_INPUT=""
 JVM_ARGS=""
-FILE_IDF=$(date +%s)
+FILE_IDF=$(date +%F-%H_%M_%S)
 
 #Function to update jmx text using value
 function update_jmx(){

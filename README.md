@@ -65,7 +65,7 @@ Supported key sizes are between 1024 to 8192.
 For EC key --keysize are SecP192K1, SecP224K1, SecP256K1, NistP192, NistP224, NistP256, NistP384 and NistP521.
 
 	Example:
-	# test-bench.sh run keygen --algorithm EC --transient=true
+	# test-bench.sh run keygen --algorithm EC --transient true
 
 ## AES CBC Encryption
 AES encryption is supported for all key sizes (128, 192 and 256) and
@@ -135,6 +135,13 @@ Let's assume we have cloned the repo at /opt/rest-api.
 - CSV
 
 	`/opt/rest-api/target/jmeter/results/`
+	
+# Adding File Identifiers
+Sometimes when running multiple sequential test cases that are similar in nature, it is possible that the output report files may get overwritten when the tool saves them with the same name. To avoid this, we can add a file identifier with the 'file-idf' parameter (optional) to distinguish them from one another:
+
+	Example:
+		# test-bench.sh run plugin --pluginId <plugin-id> --pluginType <plugin-type> --threadcount 10 --time 120 --file-idf encryptPluginResult
+		# test-bench.sh run plugin --pluginId <plugin-id> --pluginType <plugin-type> --threadcount 10 --time 120 --file-idf decryptPluginResult
 
 # Sample Output
 operation | threads | duration(sec) | total operations | average latency(ms) | p90 latency(ms) | p99 latency(ms) | min latency (ms) | max latency (ms) | Error % | Throughput per sec | capacity (kb/s)
