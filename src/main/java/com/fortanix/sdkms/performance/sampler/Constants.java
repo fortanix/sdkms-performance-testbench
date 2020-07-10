@@ -14,9 +14,9 @@ import java.util.List;
 
 class Constants {
 
-    static final String ENV_SDKMS_SERVER_URL = "SDKMS_API_ENDPOINT";
-    static final String ENV_SDKMS_API_KEY = "SDKMS_API_KEY";
-    static final String TRUST_STORE_ENV_VAR = "SDKMS_SSL_TRUST_STORE";
+    static final String ENV_SDKMS_SERVER_URL = "FORTANIX_API_ENDPOINT";
+    static final String ENV_SDKMS_API_KEY = "FORTANIX_API_KEY";
+    static final String TRUST_STORE_ENV_VAR = "FORTANIX_SSL_TRUST_STORE";
 
     static final List<Integer> INVALID_SESSION_CODES = Arrays.asList(HttpURLConnection.HTTP_UNAUTHORIZED);
     static final List<String> INVALID_SESSION_MESSAGES = Arrays.asList("Session does not exist");
