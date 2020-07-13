@@ -20,7 +20,6 @@ public class EncryptionSampler extends AbstractEncryptionAndDecryptionSampler {
     @Override
     public SampleResult runTest(JavaSamplerContext context) {
         SampleResult result = new SampleResult();
-        this.apiClient.setDebugging(true);
         result.sampleStart();
         try {
             retryOperationIfSessionExpires(new RetryableOperation() {
