@@ -10,6 +10,9 @@ package com.fortanix.sdkms.performance.sampler;
 
 import com.fortanix.sdkms.v1.ApiException;
 import com.fortanix.sdkms.v1.api.EncryptionAndDecryptionApi;
+import com.fortanix.sdkms.v1.model.BatchDecryptRequest;
+import com.fortanix.sdkms.v1.model.BatchDecryptRequestInner;
+import com.fortanix.sdkms.v1.model.DecryptRequest;
 import com.fortanix.sdkms.v1.model.DecryptRequestEx;
 import com.fortanix.sdkms.v1.model.SobjectDescriptor;
 import org.apache.jmeter.protocol.java.sampler.JavaSamplerContext;
@@ -20,7 +23,9 @@ import java.util.logging.Level;
 
 public class DecryptionSampler extends AbstractEncryptionAndDecryptionSampler {
 
-    DecryptRequestEx decryptRequest;
+    DecryptRequest decryptRequest;
+    DecryptRequestEx decryptRequestEx;
+    BatchDecryptRequest batchDecryptRequest;
 
     @Override
     public void setupTest(JavaSamplerContext context) {
@@ -29,36 +34,52 @@ public class DecryptionSampler extends AbstractEncryptionAndDecryptionSampler {
         byte[] tag;
         byte[] iv;
         try {
-            cipher = this.encryptionAndDecryptionApi.encryptEx(this.encryptRequest).getCipher();
-            tag = this.encryptionAndDecryptionApi.encryptEx(this.encryptRequest).getTag();
-            iv = this.encryptionAndDecryptionApi.encryptEx(this.encryptRequest).getIv();
+            cipher = this.encryptionAndDecryptionApi.encryptEx(this.encryptRequestEx).getCipher();
+            tag = this.encryptionAndDecryptionApi.encryptEx(this.encryptRequestEx).getTag();
+            iv = this.encryptionAndDecryptionApi.encryptEx(this.encryptRequestEx).getIv();
         } catch (ApiException e) {
             LOGGER.log(Level.INFO, "failure in encrypting : " + e.getMessage(), e);
             throw new ProviderException(e.getMessage());
         }
-        this.decryptRequest = this.encryptionDecryptionHelper.createDecryptRequest(new SobjectDescriptor().kid(this.keyId), cipher, tag, iv);
+        this.decryptRequestEx = this.encryptionDecryptionHelper.createDecryptRequest(new SobjectDescriptor().kid(this.keyId), cipher, tag, iv);
+        this.decryptRequest = this.encryptionDecryptionHelper.createDecryptRequest(cipher, tag);
+        BatchDecryptRequestInner batchDecryptRequestInner = new BatchDecryptRequestInner().kid(this.keyId).request(decryptRequest);
+
+        if (this.batchEncryptRequest.size() != 0){
+            this.batchDecryptRequest = new BatchDecryptRequest();
+            for ( int i = 0; i < this.batchEncryptRequest.size() ; i++ ) {
+                this.batchDecryptRequest.add(batchDecryptRequestInner);
+            }
+        }
     }
 
     @Override
     public SampleResult runTest(JavaSamplerContext context) {
         SampleResult result = new SampleResult();
+        this.apiClient.setDebugging(true);
         result.sampleStart();
         try {
             retryOperationIfSessionExpires(new RetryableOperation() {
                 EncryptionAndDecryptionApi encryptionAndDecryptionApi;
-                DecryptRequestEx decryptRequest;
+                DecryptRequestEx decryptRequestEx;
+                BatchDecryptRequest batchDecryptRequest;
 
-                RetryableOperation init(EncryptionAndDecryptionApi encryptionAndDecryptionApi, DecryptRequestEx decryptRequest) {
+                RetryableOperation init(EncryptionAndDecryptionApi encryptionAndDecryptionApi, DecryptRequestEx decryptRequestEx, BatchDecryptRequest batchDecryptRequest) {
                     this.encryptionAndDecryptionApi = encryptionAndDecryptionApi;
-                    this.decryptRequest = decryptRequest;
+                    this.decryptRequestEx = decryptRequestEx;
+                    this.batchDecryptRequest = batchDecryptRequest;
                     return this;
                 }
 
                 @Override
                 public Object execute() throws ApiException {
-                    return this.encryptionAndDecryptionApi.decryptEx(this.decryptRequest);
+                    if (this.batchDecryptRequest == null) {
+                        return this.encryptionAndDecryptionApi.decryptEx(this.decryptRequestEx);
+                    } else{
+                        return this.encryptionAndDecryptionApi.batchDecrypt(this.batchDecryptRequest);
+                    }
                 }
-            }.init(this.encryptionAndDecryptionApi, this.decryptRequest));
+            }.init(this.encryptionAndDecryptionApi, this.decryptRequestEx, this.batchDecryptRequest));
             result.setSuccessful(true);
         } catch (ApiException e) {
             LOGGER.info("failure in decrypting : " + e.getMessage());
