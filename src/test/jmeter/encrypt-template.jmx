@@ -1,71 +1,71 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jmeterTestPlan version="1.2" properties="3.2" jmeter="3.3 r1808647">
-  <hashTree>
-    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="SDKMS_REST_API_PERF_TEST" enabled="true">
-      <stringProp name="TestPlan.comments"></stringProp>
-      <boolProp name="TestPlan.functional_mode">false</boolProp>
-      <boolProp name="TestPlan.serialize_threadgroups">true</boolProp>
-      <elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
-        <collectionProp name="Arguments.arguments"/>
-      </elementProp>
-      <stringProp name="TestPlan.user_define_classpath"></stringProp>
-    </TestPlan>
-    <hashTree>
-      <com.blazemeter.jmeter.threads.concurrency.ConcurrencyThreadGroup guiclass="com.blazemeter.jmeter.threads.concurrency.ConcurrencyThreadGroupGui" testclass="com.blazemeter.jmeter.threads.concurrency.ConcurrencyThreadGroup" testname="SDKMS Thread Group" enabled="true">
-        <elementProp name="ThreadGroup.main_controller" elementType="com.blazemeter.jmeter.control.VirtualUserController"/>
-        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
-        <stringProp name="TargetLevel">##ThreadCount##</stringProp>
-        <stringProp name="RampUp">0</stringProp>
-        <stringProp name="Steps">0</stringProp>
-        <stringProp name="Hold">##ExecutionTime##</stringProp>
-        <stringProp name="LogFilename"></stringProp>
-        <stringProp name="Iterations"></stringProp>
-        <stringProp name="Unit">S</stringProp>
-      </com.blazemeter.jmeter.threads.concurrency.ConcurrencyThreadGroup>
+   <hashTree>
+      <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="SDKMS_REST_API_PERF_TEST" enabled="true">
+         <stringProp name="TestPlan.comments" />
+         <boolProp name="TestPlan.functional_mode">false</boolProp>
+         <boolProp name="TestPlan.serialize_threadgroups">true</boolProp>
+         <elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+            <collectionProp name="Arguments.arguments" />
+         </elementProp>
+         <stringProp name="TestPlan.user_define_classpath" />
+      </TestPlan>
       <hashTree>
-        <JavaSampler guiclass="JavaTestSamplerGui" testclass="JavaSampler" testname="SDKMS Encryption" enabled="true">
-          <elementProp name="arguments" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" enabled="true">
-            <collectionProp name="Arguments.arguments">
-              <elementProp name="algorithm" elementType="Argument">
-                <stringProp name="Argument.name">algorithm</stringProp>
-                <stringProp name="Argument.value">##Algorithm##</stringProp>
-                <stringProp name="Argument.metadata">=</stringProp>
-              </elementProp>
-              <elementProp name="keySize" elementType="Argument">
-                <stringProp name="Argument.name">keySize</stringProp>
-                <stringProp name="Argument.value">##Keysize##</stringProp>
-                <stringProp name="Argument.metadata">=</stringProp>
-              </elementProp>
-              <elementProp name="filePath" elementType="Argument">
-                <stringProp name="Argument.name">filePath</stringProp>
-                <stringProp name="Argument.value">##FilePath##</stringProp>
-                <stringProp name="Argument.metadata">=</stringProp>
-              </elementProp>
-				<elementProp name="batchSize" elementType="Argument">
-                <stringProp name="Argument.name">batchSize</stringProp>
-                <stringProp name="Argument.value">##batchSize##</stringProp>
-                <stringProp name="Argument.metadata">=</stringProp>
-              </elementProp>
-              <elementProp name="mode" elementType="Argument">
-                <stringProp name="Argument.name">mode</stringProp>
-                <stringProp name="Argument.value">##Mode##</stringProp>
-                <stringProp name="Argument.metadata">=</stringProp>
-              </elementProp>
-              <elementProp name="maxFile" elementType="Argument">
-                <stringProp name="Argument.name">maxFile</stringProp>
-                <stringProp name="Argument.value">false</stringProp>
-                <stringProp name="Argument.metadata">=</stringProp>
-              </elementProp>
-            </collectionProp>
-          </elementProp>
-          <stringProp name="classname">com.fortanix.sdkms.performance.sampler.EncryptionSampler</stringProp>
-        </JavaSampler>
-        <hashTree/>
+         <com.blazemeter.jmeter.threads.concurrency.ConcurrencyThreadGroup guiclass="com.blazemeter.jmeter.threads.concurrency.ConcurrencyThreadGroupGui" testclass="com.blazemeter.jmeter.threads.concurrency.ConcurrencyThreadGroup" testname="SDKMS Thread Group" enabled="true">
+            <elementProp name="ThreadGroup.main_controller" elementType="com.blazemeter.jmeter.control.VirtualUserController" />
+            <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+            <stringProp name="TargetLevel">##ThreadCount##</stringProp>
+            <stringProp name="RampUp">0</stringProp>
+            <stringProp name="Steps">0</stringProp>
+            <stringProp name="Hold">##ExecutionTime##</stringProp>
+            <stringProp name="LogFilename" />
+            <stringProp name="Iterations" />
+            <stringProp name="Unit">S</stringProp>
+         </com.blazemeter.jmeter.threads.concurrency.ConcurrencyThreadGroup>
+         <hashTree>
+            <JavaSampler guiclass="JavaTestSamplerGui" testclass="JavaSampler" testname="SDKMS Encryption" enabled="true">
+               <elementProp name="arguments" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" enabled="true">
+                  <collectionProp name="Arguments.arguments">
+                     <elementProp name="algorithm" elementType="Argument">
+                        <stringProp name="Argument.name">algorithm</stringProp>
+                        <stringProp name="Argument.value">##Algorithm##</stringProp>
+                        <stringProp name="Argument.metadata">=</stringProp>
+                     </elementProp>
+                     <elementProp name="keySize" elementType="Argument">
+                        <stringProp name="Argument.name">keySize</stringProp>
+                        <stringProp name="Argument.value">##Keysize##</stringProp>
+                        <stringProp name="Argument.metadata">=</stringProp>
+                     </elementProp>
+                     <elementProp name="filePath" elementType="Argument">
+                        <stringProp name="Argument.name">filePath</stringProp>
+                        <stringProp name="Argument.value">##FilePath##</stringProp>
+                        <stringProp name="Argument.metadata">=</stringProp>
+                     </elementProp>
+                     <elementProp name="batchSize" elementType="Argument">
+                        <stringProp name="Argument.name">batchSize</stringProp>
+                        <stringProp name="Argument.value">##batchSize##</stringProp>
+                        <stringProp name="Argument.metadata">=</stringProp>
+                     </elementProp>
+                     <elementProp name="mode" elementType="Argument">
+                        <stringProp name="Argument.name">mode</stringProp>
+                        <stringProp name="Argument.value">##Mode##</stringProp>
+                        <stringProp name="Argument.metadata">=</stringProp>
+                     </elementProp>
+                     <elementProp name="maxFile" elementType="Argument">
+                        <stringProp name="Argument.name">maxFile</stringProp>
+                        <stringProp name="Argument.value">false</stringProp>
+                        <stringProp name="Argument.metadata">=</stringProp>
+                     </elementProp>
+                  </collectionProp>
+               </elementProp>
+               <stringProp name="classname">com.fortanix.sdkms.performance.sampler.EncryptionSampler</stringProp>
+            </JavaSampler>
+            <hashTree />
+         </hashTree>
       </hashTree>
-    </hashTree>
-    <WorkBench guiclass="WorkBenchGui" testclass="WorkBench" testname="WorkBench" enabled="true">
-      <boolProp name="WorkBench.save">true</boolProp>
-    </WorkBench>
-    <hashTree/>
-  </hashTree>
+      <WorkBench guiclass="WorkBenchGui" testclass="WorkBench" testname="WorkBench" enabled="true">
+         <boolProp name="WorkBench.save">true</boolProp>
+      </WorkBench>
+      <hashTree />
+   </hashTree>
 </jmeterTestPlan>
