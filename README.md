@@ -4,6 +4,8 @@
 # Overview
 Performance test bench for SDKMS using REST API interface. It generates reports in HTML and CSV format. SDKMS REST performance test bench dynamically generates the JMeter JMX file and provides configurable way to specify thread count and time duration to run the operation.
 
+**Note:** Added support for SDKMS JCE provider as the client for operations, in 0.2.0 version. For more information on JCE provider, visit [Support Site](https://support.fortanix.com/hc/en-us/articles/360018362951-JCE)
+
 Performance Test Bench has been tested on Ubuntu 16.04 server.
 
 For more information on SDKMS visit [SDKMS Site](https://fortanix.com/products/sdkms/) .
@@ -15,18 +17,18 @@ For more information on SDKMS visit [SDKMS Site](https://fortanix.com/products/s
 
 * Following environment variables need to be set:
 
-	 `SDKMS_API_KEY=<SDKMS API KEY>`
+	 `FORTANIX_API_KEY=<Fortanix SDKMS API KEY>`
 
-	 [Optional] `SDKMS_API_ENDPOINT=<SDKMS URL>`
+	 [Optional] `FORTANIX_API_ENDPOINT=<SDKMS URL>`
 
 	 [Optional] `SDKMS_SSL_TRUST_STORE`=<Path to SSL Trust Store>
 
 	Example:
 
-		export SDKMS_API_KEY="OS00ZDQN2UwZjJhOGItNDdk2LWJhMjctNmJiNTkwODZjNjczOmJSRkhpTXpjcHRtT2ZhY2ZDMW1lY2JGZ0ZNamhQVEN0bGgxbXZCb3BxRkJObV9OTVp6T2NdUTFlrMWRSV1VhVkFtajV0dU1BXaWdZVnp4UVBSX2JSWE"
-		export SDKMS_API_ENDPOINT="https://sdkms.fortanix.com"
+		export FORTANIX_API_KEY="OS00ZDQN2U...............aWdZVnp4UVBSX2JSWE"
+		export FORTANIX_API_ENDPOINT="https://sdkms.fortanix.com"
 
-	> SDKMS\_API\_ENDPOINT is optional and default to https://apps.sdkms.fortanix.com .
+	> FORTANIX\_API\_ENDPOINT is optional and default to https://apps.sdkms.fortanix.com .
  	> SDKMS\_SSL\_TRUST_STORE is needed only for on-premises deployments.
 
 # Setup performance Test bench
@@ -48,7 +50,7 @@ To delete the generated artifacts, execute below command:
 	#./test-bench.sh clean
 
 
-# Supported Operation
+# Supported Operations (REST API interface)
 ## AES Key Generation
 Supported key sizes are 128, 192 and 256.
 
@@ -67,7 +69,7 @@ For EC key --keysize are SecP192K1, SecP224K1, SecP256K1, NistP192, NistP224, Ni
 	Example:
 	# test-bench.sh run keygen --algorithm EC --transient true
 
-## AES CBC Encryption
+## AES Encryption
 AES encryption is supported for all key sizes (128, 192 and 256) and
 supported modes are CBC, GCM and FPE.
 
@@ -76,7 +78,7 @@ supported modes are CBC, GCM and FPE.
 
 The final metrics shows sample time for encryption.
 
-## AES CBC Decryption
+## AES Decryption
 AES decryption is supported for all key sizes (128, 192 and 256) and
 supported modes are CBC, GCM and FPE.
 
@@ -124,6 +126,22 @@ We can capture Plugin performance metrics as below:
 > All above operation run by default with 50 thread for 5 minutes. All above operation support --threadcount and --time to overwrite the default thread count and duration.
 
 > Key generated during operation get deleted at the end of operation.
+
+# Supported Operations (JCE provider)
+## AES Encryption
+AES encryption is supported for all key sizes (128, 192 and 256) and all modes (CBC, GCM, ECB, etc) using JCE Provider Cipher interface. 
+**Note:** These are singlepart Cipher operations.   
+
+        Example:
+        # test-bench.sh run jce-encryption --algorithm AES --keysize 128 --mode GCM --filepath filepath
+
+## AES Decryption
+AES decryption is supported for all key sizes (128, 192 and 256) and all modes (CBC, GCM, ECB, etc) using JCE Provider Cipher interface.
+**Note:** These are singlepart Cipher operations.
+
+        Example:
+        # test-bench.sh run jce-decryption --algorithm AES --keysize 128 --mode GCM --filepath filepath
+
 
 # Report Location
 Let's assume we have cloned the repo at /opt/rest-api.

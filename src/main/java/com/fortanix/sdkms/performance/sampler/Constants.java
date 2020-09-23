@@ -12,20 +12,20 @@ import java.net.HttpURLConnection;
 import java.util.Arrays;
 import java.util.List;
 
-class Constants {
+public class Constants {
 
-    static final String ENV_SDKMS_SERVER_URL = "SDKMS_API_ENDPOINT";
-    static final String ENV_SDKMS_API_KEY = "SDKMS_API_KEY";
-    static final String TRUST_STORE_ENV_VAR = "SDKMS_SSL_TRUST_STORE";
+    public static final String ENV_SDKMS_SERVER_URL = "FORTANIX_API_ENDPOINT";
+    public static final String ENV_SDKMS_API_KEY = "FORTANIX_API_KEY";
+    public static final String TRUST_STORE_ENV_VAR = "SDKMS_SSL_TRUST_STORE";
 
-    static final List<Integer> INVALID_SESSION_CODES = Arrays.asList(HttpURLConnection.HTTP_UNAUTHORIZED);
-    static final List<String> INVALID_SESSION_MESSAGES = Arrays.asList("Session does not exist");
+    public static final List<Integer> INVALID_SESSION_CODES = Arrays.asList(HttpURLConnection.HTTP_UNAUTHORIZED);
+    public static final List<String> INVALID_SESSION_MESSAGES = Arrays.asList("Session does not exist");
 
-    static final String ALGORITHM = "algorithm";
-    static final String KEY_SIZE = "keySize";
-    static final String TRANSIENT = "transient";
-    static final String MODE = "mode";
-    static final String FILE_PATH = "filePath";
-    static final String HASH_ALGORITHM = "hashAlgorithm";
-    static final String BATCH_SIZE = "batchSize";
+    public static final String ALGORITHM = "algorithm";
+    public static final String KEY_SIZE = "keySize";
+    public static final String TRANSIENT = "transient";
+    public static final String MODE = "mode";
+    public static final String FILE_PATH = "filePath";
+    public static final String HASH_ALGORITHM = "hashAlgorithm";
+    public static final String BATCH_SIZE = "batchSize";
 }
