@@ -304,6 +304,40 @@ function keygen_task() {
     print_end $FILE_NAME $OPERATION
 }
 
+function jwe_task() {
+    if [ "$1" == "${HELP}" ];
+    then
+        echo "JWE captures metrics for RSA,DES,DES3,AES and Tokenization key Encryption"
+        echo "   usage:"
+        echo "   # ${SCRIPT_NAME} run encryption [--algorithm RSA|AES|DES|DES3] [--keysize 1024|2048] [--mode CBC] [--filepath </path/to/file>] [--threadcount 50|100] [--time 300|600]"
+        echo "   options:"
+        echo "   --algorithm    Encryption algorithm. Supported algorithms are RSA,DES,DES3 and AES."
+        echo "                  default value is RSA."
+        echo "   --keysize      keysize for the provided algorithm."
+        echo "                  Supported keysize RSA: '1024 to 8192', AES: '128, 192, or 256', DES: 56 and DES3: 168."
+        echo "                  default value is 1024."
+        echo "   --mode         [Optional] encryption mode, only for AES algorithm. Values: ECB, CBC, CBCNOPAD, CFB, CTR, GCM, CCM, FPE"
+        echo "                  Default value is CBC."
+        echo "   --filepath     Input plain text file to use for encryption. By default a random string is used"
+        echo "   --threadcount  Number of concurrent threads per second to be executed."
+        echo "                  default value is 50."
+        echo "   --time         Time in seconds to hold the jmeter execution."
+        echo "                  default value is 300."
+        echo ""
+        echo "One can also pass proxy(http/https) related jvm args as a csv string: --jvm-args '-Dhttps.proxyHost=proxy,-Dhttps.proxyPort=8080,-Dhttps.proxyUser=user,-Dhttps.proxyPassword=pwd'"
+        return
+    fi
+    info "JWE operation is selected"
+        FILE_NAME=SDKMS_REST_API_ENCRYPTION
+    OPERATION=ENCRYPTION
+    validate
+    get_input ${@:1}
+    update_jmx "/src/test/jmeter/jwe-generate-template.jmx" "/target/jmx/"$FILE_NAME".jmx"
+    print_start
+    mvn verify -Djmx.path="target/jmx" $JVM_ARGS
+    print_end $FILE_NAME $OPERATION
+}
+
 function encryption_task() {
     if [ "$1" == "${HELP}" ];
     then
@@ -562,6 +596,9 @@ function run_task(){
         encryption)
             task="encryption_task"
             ;;
+		jwe)
+			task="jwe_task"
+			;;
         decryption)
             task="decryption_task"
             ;;

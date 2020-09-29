@@ -24,7 +24,7 @@
         <dependency>
             <groupId>com.fortanix</groupId>
             <artifactId>sdkms-client</artifactId>
-            <version>2.20.1001</version>
+            <version>3.17.1330</version>
         </dependency>
         <dependency>
             <groupId>org.apache.jmeter</groupId>
