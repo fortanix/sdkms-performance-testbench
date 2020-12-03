@@ -39,13 +39,16 @@ public class AESHelper extends EncryptionDecryptionHelper {
 
     @Override
     public EncryptRequestEx createEncryptRequest(SobjectDescriptor key, String plain) {
-        ByteArrayOutputStream input = new ByteArrayOutputStream();
-        input.write(plain.getBytes(), 0, plain.length());
-        PKCS5Padding padding = new PKCS5Padding(AES_BLOCK_SIZE);
-        padding.pad(input);
-        EncryptRequestEx encryptRequest = new EncryptRequestEx().key(key).alg(this.algorithm).plain(input.toByteArray()).mode(this.mode).ad(this.ad).tagLen(this.tagLen);
-        if(mode != CryptMode.FPE) {
+        EncryptRequestEx encryptRequest = new EncryptRequestEx().key(key).alg(this.algorithm).mode(this.mode).ad(this.ad).tagLen(this.tagLen);
+        if(mode == CryptMode.FPE) {
+            encryptRequest.plain(plain.getBytes());
+        } else {
+            ByteArrayOutputStream input = new ByteArrayOutputStream();
+            input.write(plain.getBytes(), 0, plain.length());
+            PKCS5Padding padding = new PKCS5Padding(AES_BLOCK_SIZE);
+            padding.pad(input);
             encryptRequest.iv(this.iv);
+            encryptRequest.plain(input.toByteArray());
         }
         return encryptRequest;
     }

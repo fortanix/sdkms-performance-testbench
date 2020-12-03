@@ -45,7 +45,7 @@ public abstract class AbstractEncryptionAndDecryptionSampler extends AbstractSDK
         ObjectType objectType = ObjectType.fromValue(algorithm);
         String input = "random-text";
         if(CryptMode.fromValue(mode) == CryptMode.FPE) {
-            input = "36088650107272";
+            input = "4435748712017897";
         }
         if (StringUtils.isNotEmpty(filePath)) {
             try {
@@ -59,9 +59,8 @@ public abstract class AbstractEncryptionAndDecryptionSampler extends AbstractSDK
         this.securityObjectsApi = new SecurityObjectsApi(this.apiClient);
         SobjectRequest sobjectRequest = new SobjectRequest().name(UUID.randomUUID().toString()).objType(objectType).keySize(keySize);
         if(CryptMode.fromValue(mode) == CryptMode.FPE) {
-            // Standard fpe policy for Credit Card datatype has been fixed here.
             // TODO: To support more datatypes as input parameter.
-            FpeOptions fpeOptions = new FpeOptions().radix(10).preserve(Arrays.asList(0,1,2,3,-1,-2,-3,-4)).luhnCheck(true).name("Credit Card");
+            FpeOptions fpeOptions = new FpeOptions().radix(10);
             sobjectRequest.fpe(fpeOptions);
         }
         try {
