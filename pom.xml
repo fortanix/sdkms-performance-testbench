@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.fortanix.sdkms.performance</groupId>
     <artifactId>sdkms-jmeter-sampler</artifactId>
-    <version>0.1.0</version>
+    <version>0.2.0</version>
     <packaging>jar</packaging>
     <name>sdkms-jmeter-sampler</name>
     <url>http://maven.apache.org</url>
@@ -24,6 +24,11 @@
         <dependency>
             <groupId>com.fortanix</groupId>
             <artifactId>sdkms-client</artifactId>
+            <version>3.22.1383</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fortanix</groupId>
+            <artifactId>sdkms-jce-provider</artifactId>
             <version>3.22.1383</version>
         </dependency>
         <dependency>
@@ -88,7 +93,7 @@
                 </executions>
                 <configuration>
                     <jmeterExtensions>
-                        <artifact>com.fortanix.sdkms.performance:sdkms-jmeter-sampler:0.1.0</artifact>
+                        <artifact>com.fortanix.sdkms.performance:sdkms-jmeter-sampler:0.2.0</artifact>
                         <artifact>kg.apc:jmeter-plugins-casutg:2.4</artifact>
                         <artifact>kg.apc:cmdrunner:2.0</artifact>
                         <artifact>kg.apc:jmeter-plugins-extras:1.4.0</artifact>
