@@ -74,17 +74,15 @@ public abstract class EncryptDecryptBaseJCESampler extends JCEBaseSampler {
         String padding = "PKCS5PADDING";
         if (CryptMode.CBCNOPAD.equals(mode)) {
             padding = "NoPadding";
-        }
-        if (ObjectType.DES.equals(objectType)) {
-            return objectType.getValue() + "/" + mode.getValue() + "/" + padding;
-        }
-        if (ObjectType.DES3.equals(objectType)) {
-            return "DESede" + "/" + mode.getValue() + "/" + padding;
-        }
-        if (ObjectType.AES.equals(objectType)) {
-            return "AES" + "_" + keySize + "/" + mode.getValue() + "/" + padding;
+        } else if (ObjectType.DES.equals(objectType)) {
+            return String.format("DES/%s/%s", mode.getValue(), padding);
+        } else if (ObjectType.DES3.equals(objectType)) {
+            return String.format("DESede/%s/%s", mode.getValue(), padding);
+        } else if (ObjectType.AES.equals(objectType)) {
+            return String.format("AES_%d/%s/%s", keySize, mode.getValue(), padding);
+        } else if (ObjectType.RSA.equals(objectType)) {
+            return String.format("RSA/%s/%s", mode, padding);
         }
         throw new ProviderException("Algorithm " + objectType.getValue() + " not supported for Cipher in testbench");
     }
-
 }

@@ -4,10 +4,7 @@ import com.fortanix.sdkms.v1.model.CryptMode;
 import org.apache.jmeter.protocol.java.sampler.JavaSamplerContext;
 import org.apache.jmeter.samplers.SampleResult;
 
-import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import java.security.InvalidKeyException;
 import java.util.logging.Level;
 
 public class EncryptionJCESampler extends EncryptDecryptBaseJCESampler {
