@@ -304,6 +304,44 @@ function keygen_task() {
     print_end $FILE_NAME $OPERATION
 }
 
+function keygen_jce_task() {
+    if [ "$1" == "${HELP}" ];
+    then
+        echo "keygen captures metrics for RSA,EC,AES,DES,DES3 and Tokenization key Creation"
+        echo "   usage:"
+        echo "   # ${SCRIPT_NAME} run keygen [--algorithm RSA|AES|EC|DES|DES3] [--keysize 1024|2048] [--transient true|false] [--threadcount 50|100] [--time 300|600]"
+        echo "   options:"
+        echo "   --algorithm    Key creation algorithm. Supported algorithms are RSA,AES,DES,DES3 and EC."
+        echo "                  default value is RSA."
+        echo "   --keysize      keysize or curve name for the provided algorithm. Supported values:"
+        echo "                  RSA: '1024 to 8192'"
+        echo "                  AES: '128, 192, or 256'"
+        echo "                  DES : 56"
+        echo "                  DES3: 168"
+        echo "                  EC curves: SecP192K1, SecP224K1, SecP256K1, NistP192, NistP224, NistP256, NistP384, NistP521"
+        echo "                  default value is 1024."
+        echo "   --threadcount  Number of concurrent threads per second to be executed."
+        echo "                  default value is 50."
+        echo "   --time         Time in seconds to hold the jmeter execution."
+        echo "                  default value is 300."
+		echo "   --file-idf     A distinct identifier to add to the output CSV file for easy identification."
+        echo "                  helps in cases when there are multiple consecutive executions of the same operation."
+		echo "                  prevents the older CSV from getting overwritten by the new output file. Adds an epoch timestamp at the end of filename by default."
+        echo ""
+        echo "One can also pass proxy(http/https) related jvm args as a csv string: --jvm-args '-Dhttps.proxyHost=proxy,-Dhttps.proxyPort=8080,-Dhttps.proxyUser=user,-Dhttps.proxyPassword=pwd'"
+        return
+    fi
+    info "Keygen operation is selected"
+    FILE_NAME=SDKMS_REST_API_KEYGEN_JCE
+    OPERATION=JCE_KEYGEN
+    validate
+    get_input ${@:1}
+    update_jmx "/src/test/jmeter/key-generate-jce-template.jmx" "/target/jmx/"$FILE_NAME".jmx"
+    print_start
+    mvn verify -Djmx.path="target/jmx" $JVM_ARGS
+    print_end $FILE_NAME $OPERATION
+}
+
 function encryption_task() {
     if [ "$1" == "${HELP}" ];
     then
@@ -490,6 +528,42 @@ function sign_task() {
     print_end $FILE_NAME $OPERATION
 }
 
+function sign_jce_task() {
+    if [ "$1" == "${HELP}" ];
+    then
+        echo "sign captures metrics for RSA or EC signature generation"
+        echo "   usage:"
+        echo "   # ${SCRIPT_NAME} run sign [--algorithm RSA|EC] [--keysize 1024|2048] [--filepath </path/to/file>] [--threadcount 50|100] [--time 300|600] [--batchsize 10|100|1000]"
+        echo "   options:"
+        echo "   --algorithm       Signature generation algorithm. Supported algorithms are RSA and EC"
+        echo "                     default value is RSA."
+        echo "   --keysize         keysize or curve name for signature generation algorithm. Supported keysize are 1024 to 8192"
+        echo "                     EC supported curves: SecP192K1, SecP224K1, SecP256K1, NistP192, NistP224, NistP256, NistP384, NistP521"
+        echo "                     default value is 1024."
+        echo "   --filepath        Input plain text file to use for signing. By default a random string is used"
+        echo "   --hash-algorithm  Message digest algorithm. Supported algorithm are SHA1, SHA256, SHA384, SHA512"
+        echo "   --threadcount     Number of concurrent threads per second to be executed."
+        echo "                     default value is 50."
+        echo "   --time            Time in seconds to hold the jmeter execution."
+        echo "                     default value is 300."
+		echo "   --file-idf        A distinct identifier to add to the output CSV file for easy identification."
+        echo "                     helps in cases when there are multiple consecutive executions of the same operation."
+		echo "                     prevents the older CSV from getting overwritten by the new output file. Adds an epoch timestamp at the end of filename by default."
+        echo ""
+        echo "One can also pass proxy(http/https) related jvm args as a csv string: --jvm-args '-Dhttps.proxyHost=proxy,-Dhttps.proxyPort=8080,-Dhttps.proxyUser=user,-Dhttps.proxyPassword=pwd'"
+        return
+    fi
+    info "Sign operation is selected"
+    FILE_NAME=SDKMS_REST_API_SIGN_JCE
+    OPERATION=JCE_SIGN
+    validate
+    get_input ${@:1}
+    update_jmx "/src/test/jmeter/sign-generate-jce-template.jmx" "/target/jmx/"$FILE_NAME".jmx"
+    print_start
+    mvn verify -Djmx.path="target/jmx" $JVM_ARGS
+    print_end $FILE_NAME $OPERATION
+}
+
 function verify_task() {
     if [ "$1" == "${HELP}" ];
     then
@@ -523,6 +597,42 @@ function verify_task() {
     validate
     get_input ${@:1}
     update_jmx "/src/test/jmeter/sign-verify-template.jmx" "/target/jmx/"$FILE_NAME".jmx"
+    print_start
+    mvn verify -Djmx.path="target/jmx" $JVM_ARGS
+    print_end $FILE_NAME $OPERATION
+}
+
+function verify_jce_task() {
+    if [ "$1" == "${HELP}" ];
+    then
+        echo "verify captures metrics for RSA or EC signature verification"
+        echo "   usage:"
+        echo "   # ${SCRIPT_NAME} run verify [--algorithm RSA|EC] [--keysize 1024|2048] [--threadcount 50|100] [--time 300|600] [--batchsize 10|100|1000]"
+        echo "   options:"
+        echo "   --algorithm       Signature verification algorithm. Supported algorithms are RSA and EC"
+        echo "                     default value is RSA."
+        echo "   --keysize         keysize or curve name for signature verification algorithm. Supported keysize are 1024 to 8192"
+        echo "                     EC supported curves: SecP192K1, SecP224K1, SecP256K1, NistP192, NistP224, NistP256, NistP384, NistP521"
+        echo "                     default value is 1024."
+        echo "   --filepath        Custom plain text file, the signature of which will be used for verification. By default a random string is used"
+        echo "   --hash-algorithm  Message digest algorithm. Supported algorithm are SHA1, SHA256, SHA384, SHA512"
+        echo "   --threadcount     Number of concurrent threads per second to be executed."
+        echo "                     default value is 50."
+        echo "   --time            Time in seconds to hold the jmeter execution."
+        echo "                     default value is 300."
+		echo "   --file-idf        A distinct identifier to add to the output CSV file for easy identification."
+        echo "                     helps in cases when there are multiple consecutive executions of the same operation."
+		echo "                     prevents the older CSV from getting overwritten by the new output file. Adds an epoch timestamp at the end of filename by default."
+        echo ""
+        echo "One can also pass proxy(http/https) related jvm args as a csv string: --jvm-args '-Dhttps.proxyHost=proxy,-Dhttps.proxyPort=8080,-Dhttps.proxyUser=user,-Dhttps.proxyPassword=pwd'"
+        return
+    fi
+    info "Verify operation is selected"
+    FILE_NAME=SDKMS_REST_API_VERIFY_JCE
+    OPERATION=JCE_VERIFY
+    validate
+    get_input ${@:1}
+    update_jmx "/src/test/jmeter/sign-verify-jce-template.jmx" "/target/jmx/"$FILE_NAME".jmx"
     print_start
     mvn verify -Djmx.path="target/jmx" $JVM_ARGS
     print_end $FILE_NAME $OPERATION
@@ -564,6 +674,38 @@ function mac_generate_task() {
     print_end $FILE_NAME $OPERATION
 }
 
+function mac_generate_jce_task() {
+    if [ "$1" == "${HELP}" ];
+    then
+        echo "mac generate captures metrics for Hmac digest generation"
+        echo "   usage:"
+        echo "   # ${SCRIPT_NAME} run mac-generate [--algorithm Hmac] [--hash-algorithm SHA1] [--keysize 160] [--filepath </path/to/file>] [--threadcount 50|100] [--time 300|600]"
+        echo "   options:"
+        echo "   --hash-algorithm  hash algorithm. Supported algorithms are SHA1|SHA256|SHA384|SHA512|STREEBOG_256|STREEBOG_512"
+        echo "                     default value is SHA1."
+        echo "   --filepath        Input plain text file to use for signing. By default a random string is used"
+        echo "   --threadcount     Number of concurrent threads per second to be executed."
+        echo "                     default value is 50."
+        echo "   --time            Time in seconds to hold the jmeter execution."
+        echo "                     default value is 300."
+		echo "   --file-idf        A distinct identifier to add to the output CSV file for easy identification."
+        echo "                     helps in cases when there are multiple consecutive executions of the same operation."
+		echo "                     prevents the older CSV from getting overwritten by the new output file. Adds an epoch timestamp at the end of filename by default."
+        echo ""
+        echo "One can also pass proxy(http/https) related jvm args as a csv string: --jvm-args '-Dhttps.proxyHost=proxy,-Dhttps.proxyPort=8080,-Dhttps.proxyUser=user,-Dhttps.proxyPassword=pwd'"
+        return
+    fi
+    info "digest generate operation is selected"
+    FILE_NAME=SDKMS_REST_API_MAC_GENERATE_JCE
+    OPERATION=JCE_DIGEST_GENERATE
+    validate
+    get_input ${@:1}
+    update_jmx "/src/test/jmeter/mac-generate-jce-template.jmx" "/target/jmx/"$FILE_NAME".jmx"
+    print_start
+    mvn verify -Djmx.path="target/jmx" $JVM_ARGS
+    print_end $FILE_NAME $OPERATION
+}
+
 function mac_verify_task() {
     if [ "$1" == "${HELP}" ];
     then
@@ -600,6 +742,38 @@ function mac_verify_task() {
     print_end $FILE_NAME $OPERATION
 }
 
+function digest_generate_jce_task() {
+    if [ "$1" == "${HELP}" ];
+    then
+        echo "mac generate captures metrics for Hmac digest generation"
+        echo "   usage:"
+        echo "   # ${SCRIPT_NAME} run mac-generate [--algorithm Hmac] [--hash-algorithm SHA1] [--keysize 160] [--filepath </path/to/file>] [--threadcount 50|100] [--time 300|600]"
+        echo "   options:"
+        echo "   --hash-algorithm  hash algorithm. Supported algorithms are SHA1|SHA256|SHA384|SHA512|STREEBOG_256|STREEBOG_512"
+        echo "                     default value is SHA1."
+        echo "   --filepath        Input plain text file to use for signing. By default a random string is used"
+        echo "   --threadcount     Number of concurrent threads per second to be executed."
+        echo "                     default value is 50."
+        echo "   --time            Time in seconds to hold the jmeter execution."
+        echo "                     default value is 300."
+		echo "   --file-idf        A distinct identifier to add to the output CSV file for easy identification."
+        echo "                     helps in cases when there are multiple consecutive executions of the same operation."
+		echo "                     prevents the older CSV from getting overwritten by the new output file. Adds an epoch timestamp at the end of filename by default."
+        echo ""
+        echo "One can also pass proxy(http/https) related jvm args as a csv string: --jvm-args '-Dhttps.proxyHost=proxy,-Dhttps.proxyPort=8080,-Dhttps.proxyUser=user,-Dhttps.proxyPassword=pwd'"
+        return
+    fi
+    info "digest generate operation is selected"
+    FILE_NAME=SDKMS_REST_API_DIGEST_GENERATE_JCE
+    OPERATION=JCE_DIGEST_GENERATE
+    validate
+    get_input ${@:1}
+    update_jmx "/src/test/jmeter/digest-generate-jce-template.jmx" "/target/jmx/"$FILE_NAME".jmx"
+    print_start
+    mvn verify -Djmx.path="target/jmx" $JVM_ARGS
+    print_end $FILE_NAME $OPERATION
+}
+
 function plugin_task() {
     info "Plugin operation is selected"
     FILE_NAME=SDKMS_REST_API_PLUGIN
@@ -627,7 +801,7 @@ function run_task(){
     then
         echo " runs the REST API performance test bench for various operations"
         echo "   usage:"
-        echo "   # ${SCRIPT_NAME} run keygen|encryption|jce-encryption|decryption|jce-decryption|sign|verify|plugin"
+        echo "   # ${SCRIPT_NAME} run keygen|keygen-jce|encryption|jce-encryption|decryption|jce-decryption|sign|sign-jce|verify|verify-jce|mac-jce|digest-jce|plugin"
         return
     fi
     task=""
@@ -648,17 +822,32 @@ function run_task(){
         keygen)
             task="keygen_task"
             ;;
+        keygen-jce)
+          task="keygen_jce_task"
+          ;;
         sign)
             task="sign_task"
+            ;;
+        sign-jce)
+            task="sign_jce_task"
             ;;
         verify)
             task="verify_task"
             ;;
+        verify-jce)
+            task="verify_jce_task"
+            ;;
         mac-generate)
             task="mac_generate_task"
             ;;
+        mac-jce)
+            task="mac_generate_jce_task"
+            ;;
         mac-verify)
             task="mac_verify_task"
+            ;;
+        digest-jce)
+            task="digest_generate_jce_task"
             ;;
         plugin)
             task="plugin_task"

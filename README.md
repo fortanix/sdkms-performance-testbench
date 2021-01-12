@@ -142,6 +142,36 @@ AES decryption is supported for all key sizes (128, 192 and 256) and all modes (
         Example:
         # test-bench.sh run jce-decryption --algorithm AES --keysize 128 --mode GCM --filepath filepath
 
+## Key Generation
+keygen support to generation key for RSA, EC, AES, DES, DES3 Objcect type using JCE Provider KeyGenerator and KeyPairGenerator interfaces.
+
+	Example:
+	# test-bench.sh run keygen-jce --algorithm AES --keysize 128 --time 10
+	# test-bench.sh run keygen-jce --algorithm EC --keysize NistP192 --time 10
+
+## Signature
+It support to sign data with RSA and EC key using JCE Provider Signature interface.
+
+	Example:
+	# test-bench.sh run sign-jce --algorithm RSA --keysize 1024 --hash-algorithm SHA1 --time 10
+
+## Signature Verification
+It support to verify a sign data with RSA and EC key using JCE Provider Signature interface.
+
+	Example:
+	# test-bench.sh run verify-jce --algorithm RSA --keysize 1024 --hash-algorithm SHA1 --time 10
+
+## Mac Generation
+It use to generate mac using JCE Mac interface.
+
+	Example:
+	# test-bench.sh run mac-jce --hash-algorithm SHA1 --time 10
+
+## Digest Generation
+It use to generate digest using JCE Digest interface.
+
+	Example:
+	# test-bench.sh run digest-jce --hash-algorithm SHA1 --time 10
 
 # Report Location
 Let's assume we have cloned the repo at /opt/rest-api.
