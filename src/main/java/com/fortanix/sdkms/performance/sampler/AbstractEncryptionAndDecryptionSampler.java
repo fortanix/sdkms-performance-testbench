@@ -31,9 +31,11 @@ import static com.fortanix.sdkms.performance.sampler.Constants.*;
 public abstract class AbstractEncryptionAndDecryptionSampler extends AbstractSDKMSSamplerClient {
 
     String keyId;
-    EncryptRequestEx encryptRequest;
+    EncryptRequest encryptRequest;
+    EncryptRequestEx encryptRequestEx;
     EncryptionAndDecryptionApi encryptionAndDecryptionApi;
     EncryptionDecryptionHelper encryptionDecryptionHelper;
+    BatchEncryptRequest batchEncryptRequest;
     private SecurityObjectsApi securityObjectsApi;
 
     @Override
@@ -42,6 +44,7 @@ public abstract class AbstractEncryptionAndDecryptionSampler extends AbstractSDK
         int keySize = context.getIntParameter(KEY_SIZE, 1024);
         String mode = context.getParameter(MODE, "CBC");
         String filePath = context.getParameter(FILE_PATH);
+        int batchSize = context.getIntParameter(BATCH_SIZE, 0);
         ObjectType objectType = ObjectType.fromValue(algorithm);
         String input = "random-text";
         if(CryptMode.fromValue(mode) == CryptMode.FPE) {
@@ -70,7 +73,16 @@ public abstract class AbstractEncryptionAndDecryptionSampler extends AbstractSDK
             throw new ProviderException(e.getMessage());
         }
         this.encryptionDecryptionHelper = EncryptionDecryptionFactory.getHelper(EncryptionDecryptionType.valueOf(algorithm), CryptMode.fromValue(mode));
-        this.encryptRequest = this.encryptionDecryptionHelper.createEncryptRequest(new SobjectDescriptor().kid(this.keyId), input);
+        this.encryptRequestEx = this.encryptionDecryptionHelper.createEncryptRequest(new SobjectDescriptor().kid(this.keyId), input);
+        this.encryptRequest = this.encryptionDecryptionHelper.createEncryptRequest(input);
+        BatchEncryptRequestInner batchEncryptRequestInner = new BatchEncryptRequestInner().kid(this.keyId).request(encryptRequest);
+
+        if (batchSize != 0){
+            this.batchEncryptRequest = new BatchEncryptRequest();
+            for ( int i = 0; i < batchSize ; i++ ) {
+                this.batchEncryptRequest.add(batchEncryptRequestInner);
+            }
+        }
         this.encryptionAndDecryptionApi = new EncryptionAndDecryptionApi(this.apiClient);
     }
 

@@ -11,6 +11,7 @@ package com.fortanix.sdkms.performance.sampler;
 import com.fortanix.sdkms.v1.ApiException;
 import com.fortanix.sdkms.v1.api.EncryptionAndDecryptionApi;
 import com.fortanix.sdkms.v1.model.EncryptRequestEx;
+import com.fortanix.sdkms.v1.model.BatchEncryptRequest;
 import org.apache.jmeter.protocol.java.sampler.JavaSamplerContext;
 import org.apache.jmeter.samplers.SampleResult;
 
@@ -23,19 +24,25 @@ public class EncryptionSampler extends AbstractEncryptionAndDecryptionSampler {
         try {
             retryOperationIfSessionExpires(new RetryableOperation() {
                 EncryptionAndDecryptionApi encryptionAndDecryptionApi;
-                EncryptRequestEx encryptRequest;
+                EncryptRequestEx encryptRequestEx;
+                BatchEncryptRequest batchEncryptRequest;
 
-                RetryableOperation init(EncryptionAndDecryptionApi encryptionAndDecryptionApi, EncryptRequestEx encryptRequest) {
+                RetryableOperation init(EncryptionAndDecryptionApi encryptionAndDecryptionApi, EncryptRequestEx encryptRequestEx, BatchEncryptRequest batchEncryptRequest) {
                     this.encryptionAndDecryptionApi = encryptionAndDecryptionApi;
-                    this.encryptRequest = encryptRequest;
+                    this.encryptRequestEx = encryptRequestEx;
+                    this.batchEncryptRequest = batchEncryptRequest;
                     return this;
                 }
 
                 @Override
                 public Object execute() throws ApiException {
-                    return this.encryptionAndDecryptionApi.encryptEx(this.encryptRequest);
+                    if (this.batchEncryptRequest == null) {
+                        return this.encryptionAndDecryptionApi.encryptEx(this.encryptRequestEx);
+                    } else{
+                        return this.encryptionAndDecryptionApi.batchEncrypt(this.batchEncryptRequest);
+                    }
                 }
-            }.init(this.encryptionAndDecryptionApi, this.encryptRequest));
+            }.init(this.encryptionAndDecryptionApi, this.encryptRequestEx, this.batchEncryptRequest));
             result.setSuccessful(true);
         } catch (ApiException e) {
             LOGGER.info("failure in encrypting : " + e.getMessage());

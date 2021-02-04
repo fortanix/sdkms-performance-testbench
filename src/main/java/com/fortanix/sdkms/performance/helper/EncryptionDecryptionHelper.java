@@ -19,7 +19,7 @@ public class EncryptionDecryptionHelper {
     byte[] iv;
     byte[] ad;
     Integer tagLen;
-    private EncryptionDecryptionType encryptionDecryptionType;
+    final EncryptionDecryptionType encryptionDecryptionType;
 
     EncryptionDecryptionHelper(EncryptionDecryptionType encryptionDecryptionType) {
         this.encryptionDecryptionType = encryptionDecryptionType;
@@ -27,6 +27,14 @@ public class EncryptionDecryptionHelper {
 
     public EncryptRequestEx createEncryptRequest(SobjectDescriptor key, String plainText) {
         return new EncryptRequestEx().key(key).alg(this.algorithm).plain(plainText.getBytes()).mode(this.mode).iv(this.iv).ad(this.ad).tagLen(this.tagLen);
+    }
+
+    public EncryptRequest createEncryptRequest(String plainText) {
+        return new EncryptRequest().alg(this.algorithm).plain(plainText.getBytes()).mode(this.mode).iv(this.iv).ad(this.ad).tagLen(this.tagLen);
+    }
+
+    public DecryptRequest createDecryptRequest(byte[] cipher, byte[] tag) {
+        return new DecryptRequest().alg(this.algorithm).cipher(cipher).mode(this.mode).iv(this.iv).ad(this.ad).tag(tag);
     }
 
     public DecryptRequestEx createDecryptRequest(SobjectDescriptor key, byte[] cipher, byte[] tag, byte[] iv) {
