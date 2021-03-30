@@ -24,12 +24,12 @@
         <dependency>
             <groupId>com.fortanix</groupId>
             <artifactId>sdkms-client</artifactId>
-            <version>3.23.1408</version>
+            <version>3.25.1443</version>
         </dependency>
         <dependency>
             <groupId>com.fortanix</groupId>
             <artifactId>sdkms-jce-provider</artifactId>
-            <version>3.23.1408</version>
+            <version>3.25.1443</version>
         </dependency>
         <dependency>
             <groupId>org.apache.jmeter</groupId>
