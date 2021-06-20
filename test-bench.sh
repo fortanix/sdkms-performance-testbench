@@ -15,7 +15,7 @@ HELP="--help"
 RUN="run"
 SCRIPT_NAME="test-bench.sh"
 TB_OPERATIONS=(build_task clean_task run_task)
-RUN_OPERATIONS=(keygen_task encryption_task encryption_jce_task decryption_task decryption_jce_task sign_task verify_task plugin_task)
+RUN_OPERATIONS=(keygen_task sdk_encryption_task jce_encryption_task decryption_task decryption_jce_task sign_task verify_task plugin_task)
 THREAD_COUNT_TEXT="##ThreadCount##"
 EXECUTION_TIME_TEXT="##ExecutionTime##"
 ALGORITHM_TEXT="##Algorithm##"
@@ -50,6 +50,7 @@ BATCH_SIZE=""
 JVM_ARGS_INPUT=""
 JVM_ARGS=""
 FILE_IDF=$(date +%F-%H_%M_%S)
+INTERFACE="sdk"
 
 #Function to update jmx text using value
 function update_jmx(){
@@ -113,6 +114,9 @@ function update_jvm_args() {
 function get_input(){
 while [ $# -gt 0 ]; do
   case "$1" in
+    --interface)
+      INTERFACE="$2"
+      ;;
     --algorithm)
       ALGORITHM="$2"
       ;;
@@ -206,7 +210,7 @@ function print_end(){
        OPERATIONS=$(awk -F, 'NR>2 { print $2 ; }' $AGGREGATE_OUTPUT_FILE)
        BANDWIDTH=$(($(($OPERATIONS*$FILE_SIZE)) / $((1024*$EXECUTION_TIME))))
     fi
-	
+
     OP_NAME=$AGGREGATE_OUTPUT_FILE
     TRIM_PATTERN="-AGGREGATE.csv"
     OP_NAME=${AGGREGATE_OUTPUT_FILE/$TRIM_PATTERN/}
@@ -309,7 +313,7 @@ function keygen_task() {
     print_end $FILE_NAME $OPERATION
 }
 
-function encryption_task() {
+function sdk_encryption_task() {
     if [ "$1" == "${HELP}" ];
     then
         echo "encryption captures metrics for RSA,DES,DES3,AES and Tokenization key Encryption"
@@ -348,7 +352,7 @@ function encryption_task() {
     print_end $FILE_NAME $OPERATION
 }
 
-function encryption_jce_task() {
+function jce_encryption_task() {
     if [ "$1" == "${HELP}" ];
     then
         echo "encryption captures metrics for RSA,DES,DES3,AES Decryption using JCE provider"
@@ -643,16 +647,10 @@ function run_task(){
     key=$(echo "$1" | tr '[:upper:]' '[:lower:]')
     case ${key} in
         encryption)
-            task="encryption_task"
-            ;;
-        jce-encryption)
-            task="encryption_jce_task"
+            task="${INTERFACE}_encryption_task"
             ;;
         decryption)
-            task="decryption_task"
-            ;;
-        jce-decryption)
-            task="decryption_jce_task"
+            task="${INTERFACE}_decryption_task"
             ;;
         keygen)
             task="keygen_task"
