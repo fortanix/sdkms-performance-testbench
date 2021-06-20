@@ -389,7 +389,7 @@ function jce_encryption_task() {
     print_end $FILE_NAME $OPERATION
 }
 
-function decryption_task() {
+function sdk_decryption_task() {
     if [ "$1" == "${HELP}" ];
     then
         echo "decryption captures metrics for RSA,DES,DES3,AES and Tokenization key Decryption"
@@ -428,7 +428,7 @@ function decryption_task() {
     print_end $FILE_NAME $OPERATION
 }
 
-function decryption_jce_task() {
+function jce_decryption_task() {
     if [ "$1" == "${HELP}" ];
     then
         echo "JCE decryption captures metrics for RSA,DES,DES3,AES Decryption using JCE provider"
