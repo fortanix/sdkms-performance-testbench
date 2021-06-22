@@ -15,7 +15,7 @@ HELP="--help"
 RUN="run"
 SCRIPT_NAME="test-bench.sh"
 TB_OPERATIONS=(build_task clean_task run_task)
-RUN_OPERATIONS=(keygen_task sdk_encryption_task jce_encryption_task sdk_decryption_task jce_decryption_task sign_task verify_task plugin_task)
+RUN_OPERATIONS=(keygen_task encryption_task decryption_task sign_task verify_task plugin_task)
 THREAD_COUNT_TEXT="##ThreadCount##"
 EXECUTION_TIME_TEXT="##ExecutionTime##"
 ALGORITHM_TEXT="##Algorithm##"
@@ -313,7 +313,7 @@ function keygen_task() {
     print_end $FILE_NAME $OPERATION
 }
 
-function sdk_encryption_task() {
+function encryption_task() {
     if [ "$1" == "${HELP}" ];
     then
         echo "encryption captures metrics for RSA,DES,DES3,AES and Tokenization key Encryption"
@@ -348,25 +348,13 @@ function sdk_encryption_task() {
     OPERATION=ENCRYPTION
     validate
     get_input ${@:1}
-    update_jmx "/src/test/jmeter/encrypt-template.jmx" "/target/jmx/"$FILE_NAME".jmx"
+    update_jmx "/src/test/jmeter/encrypt-${INTERFACE}-template.jmx" "/target/jmx/"$FILE_NAME".jmx"
     print_start
     mvn verify -Djmx.path="target/jmx" $JVM_ARGS
     print_end $FILE_NAME $OPERATION
 }
 
-function jce_encryption_task() {
-    info "JCE Encryption operation is selected"
-    FILE_NAME=SDKMS_REST_API_JCE_ENCRYPTION
-    OPERATION=JCE_ENCRYPTION
-    validate
-    get_input ${@:1}
-    update_jmx "/src/test/jmeter/encrypt-jce-template.jmx" "/target/jmx/"$FILE_NAME".jmx"
-    print_start
-    mvn verify -Djmx.path="target/jmx" $JVM_ARGS
-    print_end $FILE_NAME $OPERATION
-}
-
-function sdk_decryption_task() {
+function decryption_task() {
     if [ "$1" == "${HELP}" ];
     then
         echo "decryption captures metrics for RSA,DES,DES3,AES and Tokenization key Decryption"
@@ -401,19 +389,7 @@ function sdk_decryption_task() {
     OPERATION=DECRYPTION
     validate
     get_input ${@:1}
-    update_jmx "/src/test/jmeter/decrypt-template.jmx" "/target/jmx/"$FILE_NAME".jmx"
-    print_start
-    mvn verify -Djmx.path="target/jmx" $JVM_ARGS
-    print_end $FILE_NAME $OPERATION
-}
-
-function jce_decryption_task() {
-    info "JCE Decryption operation is selected"
-    FILE_NAME=SDKMS_REST_API_JCE_DECRYPTION
-    OPERATION=JCE_DECRYPTION
-    validate
-    get_input ${@:1}
-    update_jmx "/src/test/jmeter/decrypt-jce-template.jmx" "/target/jmx/"$FILE_NAME".jmx"
+    update_jmx "/src/test/jmeter/decrypt-${INTERFACE}-template.jmx" "/target/jmx/"$FILE_NAME".jmx"
     print_start
     mvn verify -Djmx.path="target/jmx" $JVM_ARGS
     print_end $FILE_NAME $OPERATION
@@ -594,17 +570,17 @@ function run_task(){
     then
         echo " runs the REST API performance test bench for various operations"
         echo "   usage:"
-        echo "   # ${SCRIPT_NAME} run keygen|encryption|jce-encryption|decryption|jce-decryption|sign|verify|plugin"
+        echo "   # ${SCRIPT_NAME} run keygen|encryption|decryption|sign|verify|plugin"
         return
     fi
     task=""
     key=$(echo "$1" | tr '[:upper:]' '[:lower:]')
     case ${key} in
         encryption)
-            task="${INTERFACE}_encryption_task"
+            task="encryption_task"
             ;;
         decryption)
-            task="${INTERFACE}_decryption_task"
+            task="decryption_task"
             ;;
         keygen)
             task="keygen_task"
