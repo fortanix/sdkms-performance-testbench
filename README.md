@@ -133,14 +133,14 @@ AES encryption is supported for all key sizes (128, 192 and 256) and all modes (
 **Note:** These are singlepart Cipher operations.   
 
         Example:
-        # test-bench.sh run jce-encryption --algorithm AES --keysize 128 --mode GCM --filepath filepath
+        # test-bench.sh run encryption --algorithm AES --keysize 128 --mode GCM --interface jce --filepath filepath
 
 ## AES Decryption
 AES decryption is supported for all key sizes (128, 192 and 256) and all modes (CBC, GCM, ECB, etc) using JCE Provider Cipher interface.
 **Note:** These are singlepart Cipher operations.
 
         Example:
-        # test-bench.sh run jce-decryption --algorithm AES --keysize 128 --mode GCM --filepath filepath
+        # test-bench.sh run decryption --algorithm AES --keysize 128 --mode GCM --interface jce --filepath filepath
 
 
 # Report Location
