@@ -15,7 +15,7 @@ HELP="--help"
 RUN="run"
 SCRIPT_NAME="test-bench.sh"
 TB_OPERATIONS=(build_task clean_task run_task)
-RUN_OPERATIONS=(keygen_task encryption_task encryption_jce_task decryption_task decryption_jce_task sign_task verify_task plugin_task)
+RUN_OPERATIONS=(keygen_task encryption_task decryption_task sign_task verify_task plugin_task)
 THREAD_COUNT_TEXT="##ThreadCount##"
 EXECUTION_TIME_TEXT="##ExecutionTime##"
 ALGORITHM_TEXT="##Algorithm##"
@@ -50,6 +50,7 @@ BATCH_SIZE=""
 JVM_ARGS_INPUT=""
 JVM_ARGS=""
 FILE_IDF=$(date +%F-%H_%M_%S)
+INTERFACE="sdk"
 
 #Function to update jmx text using value
 function update_jmx(){
@@ -113,6 +114,9 @@ function update_jvm_args() {
 function get_input(){
 while [ $# -gt 0 ]; do
   case "$1" in
+    --interface)
+      INTERFACE="$2"
+      ;;
     --algorithm)
       ALGORITHM="$2"
       ;;
@@ -175,7 +179,7 @@ update_jvm_args
 #Function to print start of test
 function print_start(){
     info "#######################################################################################"
-    info "Running Jmeter for operation: "$OPERATION" using algorithm: "$ALGORITHM", keysize: "$KEYSIZE", mode:"$MODE", inputFilePath: "$FILEPATH", transient: "$TRANSIENT", Threadcount: "$THREAD_COUNT", time: "$EXECUTION_TIME
+    info "Running Jmeter for operation: "$OPERATION" using algorithm: "$ALGORITHM", keysize: "$KEYSIZE", mode:"$MODE", interface: "$INTERFACE", inputFilePath: "$FILEPATH", transient: "$TRANSIENT", Threadcount: "$THREAD_COUNT", time: "$EXECUTION_TIME
     info "#######################################################################################"
 }
 
@@ -193,9 +197,9 @@ function print_end(){
     fi
     if [ -z "$BATCH_SIZE" ]
     then
-        AGGREGATE_OUTPUT_FILE=$SDKMS_REST_API_HOME"/target/jmeter/results/"$2"-"$ALGORITHM"-"$KEYSIZE"-"$THREAD_COUNT"THREADS-"$EXECUTION_TIME"SECONDS-"$FILE_IDF_SUB"-AGGREGATE.csv"
+        AGGREGATE_OUTPUT_FILE=$SDKMS_REST_API_HOME"/target/jmeter/results/"$2"-"$ALGORITHM"-"$KEYSIZE"-"$INTERFACE"-"$THREAD_COUNT"THREADS-"$EXECUTION_TIME"SECONDS-"$FILE_IDF_SUB"-AGGREGATE.csv"
     else
-        AGGREGATE_OUTPUT_FILE=$SDKMS_REST_API_HOME"/target/jmeter/results/"BATCH""$2"-"$ALGORITHM"-"$KEYSIZE"-"$THREAD_COUNT"THREADS-"$EXECUTION_TIME"SECONDS-BATCHSIZE-"$BATCH_SIZE"-"$FILE_IDF_SUB"-AGGREGATE.csv"
+        AGGREGATE_OUTPUT_FILE=$SDKMS_REST_API_HOME"/target/jmeter/results/"BATCH""$2"-"$ALGORITHM"-"$KEYSIZE"-"$INTERFACE"-"$THREAD_COUNT"THREADS-"$EXECUTION_TIME"SECONDS-BATCHSIZE-"$BATCH_SIZE"-"$FILE_IDF_SUB"-AGGREGATE.csv"
     fi
     java -jar $SDKMS_REST_API_HOME"/target/jmeter/lib/ext/cmdrunner-2.0.jar" --tool Reporter --generate-csv $AGGREGATE_OUTPUT_FILE --input-jtl $CSV_OUTPUT_FILE --plugin-type AggregateReport
 
@@ -206,7 +210,7 @@ function print_end(){
        OPERATIONS=$(awk -F, 'NR>2 { print $2 ; }' $AGGREGATE_OUTPUT_FILE)
        BANDWIDTH=$(($(($OPERATIONS*$FILE_SIZE)) / $((1024*$EXECUTION_TIME))))
     fi
-	
+
     OP_NAME=$AGGREGATE_OUTPUT_FILE
     TRIM_PATTERN="-AGGREGATE.csv"
     OP_NAME=${AGGREGATE_OUTPUT_FILE/$TRIM_PATTERN/}
@@ -214,8 +218,8 @@ function print_end(){
 
     awk -v THREADS="$THREAD_COUNT" -v CAPACITY="$BANDWIDTH" -v TIME="$EXECUTION_TIME" -v OP_NAME="$OP_NAME" 'BEGIN { FS=","; OFS="," }; FNR == 1 { print "operation","threads","duration(sec)","total operations","average latency(ms)","p90 latency(ms)","p99 latency(ms)","min latency (ms)","max latency (ms)","Error %","Throughput per sec","Cipher capacity (kb/s)" }; FNR  ==2 { print OP_NAME,THREADS,TIME,$2,$3,$5,$7,$8,$9,$10,$11,CAPACITY }' $AGGREGATE_OUTPUT_FILE > temp.csv && mv temp.csv $AGGREGATE_OUTPUT_FILE;
 
-    mv $HTML_OUTPUT_DIR $SDKMS_REST_API_HOME"/target/jmeter/reports/"$2"-"$ALGORITHM"-"$KEYSIZE"-"$THREAD_COUNT"THREADS-"$EXECUTION_TIME"SECONDS-"$FILE_IDF_SUB"-HTML"
-    mv $CSV_OUTPUT_FILE $SDKMS_REST_API_HOME"/target/jmeter/results/"$2"-"$ALGORITHM"-"$KEYSIZE"-"$THREAD_COUNT"THREADS-"$EXECUTION_TIME"SECONDS-"$FILE_IDF_SUB"-DATA.csv"
+    mv $HTML_OUTPUT_DIR $SDKMS_REST_API_HOME"/target/jmeter/reports/"$2"-"$ALGORITHM"-"$KEYSIZE"-"$INTERFACE"-"$THREAD_COUNT"THREADS-"$EXECUTION_TIME"SECONDS-"$FILE_IDF_SUB"-HTML"
+    mv $CSV_OUTPUT_FILE $SDKMS_REST_API_HOME"/target/jmeter/results/"$2"-"$ALGORITHM"-"$KEYSIZE"-"$INTERFACE"-"$THREAD_COUNT"THREADS-"$EXECUTION_TIME"SECONDS-"$FILE_IDF_SUB"-DATA.csv"
     info "Html output can be found at "$HTML_OUTPUT_DIR"/index.html"
     info "csv output can be found at "$AGGREGATE_OUTPUT_FILE
 }
@@ -314,13 +318,15 @@ function encryption_task() {
     then
         echo "encryption captures metrics for RSA,DES,DES3,AES and Tokenization key Encryption"
         echo "   usage:"
-        echo "   # ${SCRIPT_NAME} run encryption [--algorithm RSA|AES|DES|DES3] [--keysize 1024|2048] [--mode CBC] [--filepath </path/to/file>] [--threadcount 50|100] [--time 300|600]"
+        echo "   # ${SCRIPT_NAME} run encryption [--algorithm RSA|AES|DES|DES3] [--keysize 1024|2048] [--interface sdk|jce] [--mode CBC] [--filepath </path/to/file>] [--threadcount 50|100] [--time 300|600]"
         echo "   options:"
         echo "   --algorithm    Encryption algorithm. Supported algorithms are RSA,DES,DES3 and AES."
         echo "                  default value is RSA."
         echo "   --keysize      keysize for the provided algorithm."
         echo "                  Supported keysize RSA: '1024 to 8192', AES: '128, 192, or 256', DES: 56 and DES3: 168."
         echo "                  default value is 1024."
+        echo "   --interface    interface for performing the operation. Values: sdk, jce"
+        echo "                  Default interface is sdk."
         echo "   --mode         [Optional] encryption mode, only for AES algorithm. Values: ECB, CBC, CBCNOPAD, CFB, CTR, GCM, CCM, FPE"
         echo "                  Default value is CBC."
         echo "   --batchsize    Create a batch encrypt request with the provided batch size."
@@ -342,44 +348,7 @@ function encryption_task() {
     OPERATION=ENCRYPTION
     validate
     get_input ${@:1}
-    update_jmx "/src/test/jmeter/encrypt-template.jmx" "/target/jmx/"$FILE_NAME".jmx"
-    print_start
-    mvn verify -Djmx.path="target/jmx" $JVM_ARGS
-    print_end $FILE_NAME $OPERATION
-}
-
-function encryption_jce_task() {
-    if [ "$1" == "${HELP}" ];
-    then
-        echo "encryption captures metrics for RSA,DES,DES3,AES Decryption using JCE provider"
-        echo "   usage:"
-        echo "   # ${SCRIPT_NAME} run encryption [--algorithm RSA|AES|DES|DES3] [--keysize 1024|2048] [--mode CBC] [--filepath </path/to/file>] [--threadcount 50|100] [--time 300|600]"
-        echo "   options:"
-        echo "   --algorithm    Encryption algorithm. Supported algorithms are RSA,DES,DES3 and AES."
-        echo "                  default value is AES."
-        echo "   --keysize      keysize for the provided algorithm."
-        echo "                  Supported keysize RSA: '1024 to 8192', AES: '128, 192, or 256', DES: 56 and DES3: 168."
-        echo "                  default value is 128."
-        echo "   --mode         [Optional] encryption mode, only for AES algorithm. Values: ECB, CBC, CBCNOPAD, CFB, CTR, GCM, CCM, FPE"
-        echo "                  Default value is CBC."
-        echo "   --filepath     Input plain text file to use for encryption. By default a random string is used"
-        echo "   --threadcount  Number of concurrent threads per second to be executed."
-        echo "                  default value is 50."
-        echo "   --time         Time in seconds to hold the jmeter execution."
-        echo "                  default value is 300."
-		echo "   --file-idf     A distinct identifier to add to the output CSV file for easy identification."
-        echo "                  helps in cases when there are multiple consecutive executions of the same operation."
-		echo "                  prevents the older CSV from getting overwritten by the new output file. Adds an epoch timestamp at the end of filename by default."
-        echo ""
-        echo "One can also pass proxy(http/https) related jvm args as a csv string: --jvm-args '-Dhttps.proxyHost=proxy,-Dhttps.proxyPort=8080,-Dhttps.proxyUser=user,-Dhttps.proxyPassword=pwd'"
-        return
-    fi
-    info "JCE Encryption operation is selected"
-    FILE_NAME=SDKMS_REST_API_JCE_ENCRYPTION
-    OPERATION=JCE_ENCRYPTION
-    validate
-    get_input ${@:1}
-    update_jmx "/src/test/jmeter/encrypt-jce-template.jmx" "/target/jmx/"$FILE_NAME".jmx"
+    update_jmx "/src/test/jmeter/encrypt-${INTERFACE}-template.jmx" "/target/jmx/"$FILE_NAME".jmx"
     print_start
     mvn verify -Djmx.path="target/jmx" $JVM_ARGS
     print_end $FILE_NAME $OPERATION
@@ -390,13 +359,15 @@ function decryption_task() {
     then
         echo "decryption captures metrics for RSA,DES,DES3,AES and Tokenization key Decryption"
         echo "   usage:"
-        echo "   # ${SCRIPT_NAME} run decryption [--algorithm RSA|AES|DES|DES3] [--keysize 1024|2048] [--mode CBC] [--filepath </path/to/file>] [--threadcount 50|100] [--time 300|600]"
+        echo "   # ${SCRIPT_NAME} run decryption [--algorithm RSA|AES|DES|DES3] [--keysize 1024|2048] [--interface sdk|jce] [--mode CBC] [--filepath </path/to/file>] [--threadcount 50|100] [--time 300|600]"
         echo "   options:"
         echo "   --algorithm    Decryption algorithm. Supported algorithms are RSA and AES."
         echo "                  default value is RSA."
         echo "   --keysize      keysize for the provided algorithm."
         echo "                  Supported keysize RSA: '1024 to 8192', AES: '128, 192, or 256', DES: 56 and DES3: 168."
         echo "                  default value is 1024."
+        echo "   --interface    interface for performing the operation. Values: sdk, jce"
+        echo "                  Default interface is sdk."
         echo "   --mode         [Optional] encryption mode, only for AES algorithm. Values: ECB, CBC, CBCNOPAD, CFB, CTR, GCM, CCM, FPE"
         echo "                  Default value is CBC."
         echo "   --batchsize    Create a batch decrypt request with the provided batch size."
@@ -418,44 +389,7 @@ function decryption_task() {
     OPERATION=DECRYPTION
     validate
     get_input ${@:1}
-    update_jmx "/src/test/jmeter/decrypt-template.jmx" "/target/jmx/"$FILE_NAME".jmx"
-    print_start
-    mvn verify -Djmx.path="target/jmx" $JVM_ARGS
-    print_end $FILE_NAME $OPERATION
-}
-
-function decryption_jce_task() {
-    if [ "$1" == "${HELP}" ];
-    then
-        echo "JCE decryption captures metrics for RSA,DES,DES3,AES Decryption using JCE provider"
-        echo "   usage:"
-        echo "   # ${SCRIPT_NAME} run jce-decryption [--algorithm RSA|AES|DES|DES3] [--keysize 1024|2048] [--mode CBC] [--filepath </path/to/file>] [--threadcount 50|100] [--time 300|600]"
-        echo "   options:"
-        echo "   --algorithm    Decryption algorithm. Supported algorithms are RSA and AES."
-        echo "                  default value is RSA."
-        echo "   --keysize      keysize for the provided algorithm."
-        echo "                  Supported keysize RSA: '1024 to 8192', AES: '128, 192, or 256', DES: 56 and DES3: 168."
-        echo "                  default value is 1024."
-        echo "   --mode         [Optional] encryption mode, only for AES algorithm. Values: ECB, CBC, CBCNOPAD, CFB, CTR, GCM, CCM, FPE"
-        echo "                  Default value is CBC."
-        echo "   --filepath     Input plain text file, the cipher of which to be used for decryption. By default a random string is used"
-        echo "   --threadcount  Number of concurrent threads per second to be executed."
-        echo "                  default value is 50."
-        echo "   --time         Time in seconds to hold the jmeter execution."
-        echo "                  default value is 300."
-		echo "   --file-idf     A distinct identifier to add to the output CSV file for easy identification."
-        echo "                  helps in cases when there are multiple consecutive executions of the same operation."
-		echo "                  prevents the older CSV from getting overwritten by the new output file. Adds an epoch timestamp at the end of filename by default."
-        echo ""
-        echo "One can also pass proxy(http/https) related jvm args as a csv string: --jvm-args '-Dhttps.proxyHost=proxy,-Dhttps.proxyPort=8080,-Dhttps.proxyUser=user,-Dhttps.proxyPassword=pwd'"
-        return
-    fi
-    info "JCE Decryption operation is selected"
-    FILE_NAME=SDKMS_REST_API_JCE_DECRYPTION
-    OPERATION=JCE_DECRYPTION
-    validate
-    get_input ${@:1}
-    update_jmx "/src/test/jmeter/decrypt-jce-template.jmx" "/target/jmx/"$FILE_NAME".jmx"
+    update_jmx "/src/test/jmeter/decrypt-${INTERFACE}-template.jmx" "/target/jmx/"$FILE_NAME".jmx"
     print_start
     mvn verify -Djmx.path="target/jmx" $JVM_ARGS
     print_end $FILE_NAME $OPERATION
@@ -636,7 +570,7 @@ function run_task(){
     then
         echo " runs the REST API performance test bench for various operations"
         echo "   usage:"
-        echo "   # ${SCRIPT_NAME} run keygen|encryption|jce-encryption|decryption|jce-decryption|sign|verify|plugin"
+        echo "   # ${SCRIPT_NAME} run keygen|encryption|decryption|sign|verify|plugin"
         return
     fi
     task=""
@@ -645,14 +579,8 @@ function run_task(){
         encryption)
             task="encryption_task"
             ;;
-        jce-encryption)
-            task="encryption_jce_task"
-            ;;
         decryption)
             task="decryption_task"
-            ;;
-        jce-decryption)
-            task="decryption_jce_task"
             ;;
         keygen)
             task="keygen_task"
