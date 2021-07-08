@@ -3,6 +3,7 @@ package com.fortanix.sdkms.performance.sampler.jce;
 import org.apache.jmeter.protocol.java.sampler.JavaSamplerContext;
 import org.apache.jmeter.samplers.SampleResult;
 
+import java.io.UnsupportedEncodingException;
 import java.security.*;
 import java.security.spec.PSSParameterSpec;
 import java.util.logging.Level;
@@ -37,10 +38,10 @@ public class SignatureGenerationJCESampler extends SignatureVerificationBaseSamp
             result.setSuccessful(false);
         }
         try {
-            sig.update(Byte.parseByte(this.input));
+            sig.update(this.input.getBytes("UTF8"));
             sig.sign();
             result.setSuccessful(true);
-        } catch (SignatureException e) {
+        } catch (SignatureException | UnsupportedEncodingException e) {
             LOGGER.log(Level.SEVERE, "failure in key generation : " + e.getMessage(), e);
             result.setSuccessful(false);
         }
