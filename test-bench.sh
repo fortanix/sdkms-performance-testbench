@@ -440,13 +440,15 @@ function verify_task() {
     then
         echo "verify captures metrics for RSA or EC signature verification"
         echo "   usage:"
-        echo "   # ${SCRIPT_NAME} run verify [--algorithm RSA|EC] [--keysize 1024|2048] [--threadcount 50|100] [--time 300|600] [--batchsize 10|100|1000]"
+        echo "   # ${SCRIPT_NAME} run verify [--algorithm RSA|EC] [--keysize 1024|2048] [--interface sdk|jce] [--threadcount 50|100] [--time 300|600] [--batchsize 10|100|1000]"
         echo "   options:"
         echo "   --algorithm       Signature verification algorithm. Supported algorithms are RSA and EC"
         echo "                     default value is RSA."
         echo "   --keysize         keysize or curve name for signature verification algorithm. Supported keysize are 1024 to 8192"
         echo "                     EC supported curves: SecP192K1, SecP224K1, SecP256K1, NistP192, NistP224, NistP256, NistP384, NistP521"
         echo "                     default value is 1024."
+        echo "   --interface       interface for performing the operation. Values: sdk, jce"
+        echo "                     Default interface is sdk."
         echo "   --filepath        Custom plain text file, the signature of which will be used for verification. By default a random string is used"
         echo "   --hash-algorithm  Message digest algorithm. Supported algorithm are SHA1, SHA256, SHA384, SHA512"
         echo "   --threadcount     Number of concurrent threads per second to be executed."
@@ -467,7 +469,7 @@ function verify_task() {
     OPERATION=VERIFY
     validate
     get_input ${@:1}
-    update_jmx "/src/test/jmeter/sign-verify-template.jmx" "/target/jmx/"$FILE_NAME".jmx"
+    update_jmx "/src/test/jmeter/sign-verify-${INTERFACE}-template.jmx" "/target/jmx/"$FILE_NAME".jmx"
     print_start
     mvn verify -Djmx.path="target/jmx" $JVM_ARGS
     print_end $FILE_NAME $OPERATION

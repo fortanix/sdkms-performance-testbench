@@ -42,13 +42,13 @@
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
               <elementProp name="batchSize" elementType="Argument">
-                <stringProp name="Argument.name">batchSize</stringProp>
-                <stringProp name="Argument.value">##batchSize##</stringProp>
-                <stringProp name="Argument.metadata">=</stringProp>
+                  <stringProp name="Argument.name">batchSize</stringProp>
+                  <stringProp name="Argument.value">##batchSize##</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
             </collectionProp>
           </elementProp>
-          <stringProp name="classname">com.fortanix.sdkms.performance.sampler.SignatureVerificationSampler</stringProp>
+          <stringProp name="classname">com.fortanix.sdkms.performance.sampler.jce.SignatureVerificationJCESampler</stringProp>
         </JavaSampler>
         <hashTree/>
       </hashTree>
