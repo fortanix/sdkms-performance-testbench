@@ -279,7 +279,7 @@ function keygen_task() {
     then
         echo "keygen captures metrics for RSA,EC,AES,DES,DES3 and Tokenization key Creation"
         echo "   usage:"
-        echo "   # ${SCRIPT_NAME} run keygen [--algorithm RSA|AES|EC|DES|DES3] [--keysize 1024|2048] [--transient true|false] [--threadcount 50|100] [--time 300|600]"
+        echo "   # ${SCRIPT_NAME} run keygen [--algorithm RSA|AES|EC|DES|DES3] [--keysize 1024|2048] [--interface sdk|jce] [--transient true|false] [--threadcount 50|100] [--time 300|600]"
         echo "   options:"
         echo "   --algorithm    Key creation algorithm. Supported algorithms are RSA,AES,DES,DES3 and EC."
         echo "                  default value is RSA."
@@ -290,6 +290,8 @@ function keygen_task() {
         echo "                  DES3: 168"
         echo "                  EC curves: SecP192K1, SecP224K1, SecP256K1, NistP192, NistP224, NistP256, NistP384, NistP521"
         echo "                  default value is 1024."
+        echo "   --interface    interface for performing the operation. Values: sdk, jce"
+        echo "                  Default interface is sdk."
         echo "   --transient    true|false . In order to test transient key generation. Default is false."
         echo "   --threadcount  Number of concurrent threads per second to be executed."
         echo "                  default value is 50."
@@ -307,7 +309,7 @@ function keygen_task() {
     OPERATION=KEYGEN
     validate
     get_input ${@:1}
-    update_jmx "/src/test/jmeter/key-generate-template.jmx" "/target/jmx/"$FILE_NAME".jmx"
+    update_jmx "/src/test/jmeter/key-generate-${INTERFACE}-template.jmx" "/target/jmx/"$FILE_NAME".jmx"
     print_start
     mvn verify -Djmx.path="target/jmx" $JVM_ARGS
     print_end $FILE_NAME $OPERATION
