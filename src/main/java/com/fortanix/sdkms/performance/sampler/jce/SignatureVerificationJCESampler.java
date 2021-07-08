@@ -22,8 +22,6 @@ public class SignatureVerificationJCESampler extends SignatureVerificationBaseSa
             LOGGER.log(Level.SEVERE, "failure in signature verification : " + e.getMessage(), e);
             result.setSuccessful(false);
         }
-        this.pssParameterDigest = "SHA256";
-        this.mgf1ParameterSpec = null;
         if (this.mgf1ParameterSpec != null || this.pssParameterDigest != null) {
             assert sig != null;
             try {
