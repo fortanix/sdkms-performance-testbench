@@ -1,5 +1,6 @@
 package com.fortanix.sdkms.performance.sampler.jce;
 
+import com.fortanix.sdkms.jce.provider.AlgorithmParameters;
 import com.fortanix.sdkms.jce.provider.SecurityObjectParameterSpec;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jmeter.protocol.java.sampler.JavaSamplerContext;
@@ -8,6 +9,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.*;
+import java.security.spec.ECGenParameterSpec;
 import java.security.spec.MGF1ParameterSpec;
 import java.util.logging.Level;
 
@@ -46,34 +48,26 @@ public abstract class SignatureVerificationBaseSampler extends JCEBaseSampler {
     private static KeyPair getKeyPair(String algorithm, String keySize) {
         KeyPairGenerator kpg = null;
         try {
-            kpg = KeyPairGenerator.getInstance(algorithm, "sdkms-jce");
-        } catch (NoSuchProviderException | NoSuchAlgorithmException e) {
-            LOGGER.log(Level.SEVERE, "failure in key generation : " + e.getMessage(), e);
-        }
-        SecurityObjectParameterSpec parameterSpec = new SecurityObjectParameterSpec(false);
-        kpg.initialize(Integer.parseInt(keySize));
-        try {
-            kpg.initialize(parameterSpec, null);
-        } catch (InvalidAlgorithmParameterException e) {
+            if(algorithm.equalsIgnoreCase("ECDSA")) {
+                kpg = KeyPairGenerator.getInstance("EC", "sdkms-jce");
+                SecurityObjectParameterSpec parameterSpec = new SecurityObjectParameterSpec((new ECGenParameterSpec(AlgorithmParameters.NistP192)), false);
+                kpg.initialize(new ECGenParameterSpec(AlgorithmParameters.NistP192), null); // spec
+                kpg.initialize(parameterSpec, null);
+            }
+            else {
+                kpg = KeyPairGenerator.getInstance(algorithm, "sdkms-jce");
+                kpg.initialize(Integer.parseInt(keySize));
+                SecurityObjectParameterSpec parameterSpec = new SecurityObjectParameterSpec(false);
+                kpg.initialize(parameterSpec, null);
+            }
+        } catch (NoSuchProviderException | NoSuchAlgorithmException | InvalidAlgorithmParameterException e) {
             LOGGER.log(Level.SEVERE, "failure in key generation : " + e.getMessage(), e);
         }
         return kpg.genKeyPair();
     }
 
     private String jceAlgo(String algorithm, String hashAlgorithm) {
-        String alg = "";
-        if (algorithm.equalsIgnoreCase("RSA")) {
-            if (hashAlgorithm.equalsIgnoreCase("SHA1")) {
-                alg = "SHA1withRSA";
-            } else if (hashAlgorithm.equalsIgnoreCase("SHA256")) {
-                alg = "SHA256withRSA";
-            } else if (hashAlgorithm.equalsIgnoreCase("SHA384")) {
-                alg = "SHA384withRSA";
-            } else if (hashAlgorithm.equalsIgnoreCase("SHA512")) {
-                alg = "SHA512withRSA";
-            }
-        }
-        return alg;
+        return hashAlgorithm.toUpperCase() + "with" + algorithm.toUpperCase();
     }
 
 }

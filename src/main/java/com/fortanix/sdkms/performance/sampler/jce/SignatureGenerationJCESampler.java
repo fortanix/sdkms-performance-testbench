@@ -21,13 +21,15 @@ public class SignatureGenerationJCESampler extends SignatureVerificationBaseSamp
             LOGGER.log(Level.SEVERE, "failure in signature generation : " + e.getMessage(), e);
             result.setSuccessful(false);
         }
-        if (this.mgf1ParameterSpec != null || this.pssParameterDigest != null) {
-            assert sig != null;
-            try {
-                sig.setParameter(new PSSParameterSpec(pssParameterDigest, "MGF1", mgf1ParameterSpec, 32, 1));
-            } catch (InvalidAlgorithmParameterException e) {
-                LOGGER.log(Level.SEVERE, "failure in signature generation : " + e.getMessage(), e);
-                result.setSuccessful(false);
+        if(this.algorithm.contains("RSA")) {
+            if (this.mgf1ParameterSpec != null || this.pssParameterDigest != null) {
+                assert sig != null;
+                try {
+                    sig.setParameter(new PSSParameterSpec(pssParameterDigest, "MGF1", mgf1ParameterSpec, 32, 1));
+                } catch (InvalidAlgorithmParameterException e) {
+                    LOGGER.log(Level.SEVERE, "failure in signature generation : " + e.getMessage(), e);
+                    result.setSuccessful(false);
+                }
             }
         }
         assert sig != null;
