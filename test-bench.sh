@@ -477,43 +477,6 @@ function verify_task() {
     print_end $FILE_NAME $OPERATION
 }
 
-function sign_jce_task() {
-    if [ "$1" == "${HELP}" ];
-    then
-        echo "sign captures metrics for RSA or EC signature generation"
-        echo "   usage:"
-        echo "   # ${SCRIPT_NAME} run sign [--algorithm RSA|EC] [--keysize 1024|2048] [--filepath </path/to/file>] [--threadcount 50|100] [--time 300|600] [--batchsize 10|100|1000]"
-        echo "   options:"
-        echo "   --algorithm       Signature generation algorithm. Supported algorithms are RSA and EC"
-        echo "                     default value is RSA."
-        echo "   --keysize         keysize or curve name for signature generation algorithm. Supported keysize are 1024 to 8192"
-        echo "                     EC supported curves: SecP192K1, SecP224K1, SecP256K1, NistP192, NistP224, NistP256, NistP384, NistP521"
-        echo "                     default value is 1024."
-        echo "   --filepath        Input plain text file to use for signing. By default a random string is used"
-        echo "   --hash-algorithm  Message digest algorithm. Supported algorithm are SHA1, SHA256, SHA384, SHA512"
-        echo "   --threadcount     Number of concurrent threads per second to be executed."
-        echo "                     default value is 50."
-        echo "   --time            Time in seconds to hold the jmeter execution."
-        echo "                     default value is 300."
-		echo "   --file-idf        A distinct identifier to add to the output CSV file for easy identification."
-        echo "                     helps in cases when there are multiple consecutive executions of the same operation."
-		echo "                     prevents the older CSV from getting overwritten by the new output file. Adds an epoch timestamp at the end of filename by default."
-        echo ""
-        echo "One can also pass proxy(http/https) related jvm args as a csv string: --jvm-args '-Dhttps.proxyHost=proxy,-Dhttps.proxyPort=8080,-Dhttps.proxyUser=user,-Dhttps.proxyPassword=pwd'"
-        return
-    fi
-    info "Sign operation is selected"
-    FILE_NAME=SDKMS_REST_API_SIGN_JCE
-    OPERATION=JCE_SIGN
-    validate
-    get_input ${@:1}
-    update_jmx "/src/test/jmeter/sign-generate-jce-template.jmx" "/target/jmx/"$FILE_NAME".jmx"
-    print_start
-    mvn verify -Djmx.path="target/jmx" $JVM_ARGS
-    print_end $FILE_NAME $OPERATION
-}
-
-
 function mac_generate_task() {
     if [ "$1" == "${HELP}" ];
     then
@@ -630,9 +593,6 @@ function run_task(){
             ;;
         sign)
             task="sign_task"
-            ;;
-        sign-jce)
-            task="sign_jce_task"
             ;;
         verify)
             task="verify_task"
