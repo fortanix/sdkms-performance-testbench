@@ -128,6 +128,26 @@ We can capture Plugin performance metrics as below:
 > Key generated during operation get deleted at the end of operation.
 
 # Supported Operations (JCE provider)
+
+## AES Key Generation
+Supported key sizes are 128, 192 and 256.
+
+	Example:
+	# test-bench.sh run keygen --algorithm AES --keysize 128 --transient true --threadcount 5 --time 30 --interface jce
+
+## RSA Key Generation
+Supported key sizes are between 1024 to 8192.
+
+	Example:
+	# test-bench.sh run keygen --algorithm RSA --keysize 1024 --transient true --threadcount 5 --time 30 --interface jce
+
+## EC Key Generation
+For EC key --keysize are SecP192K1, SecP224K1, SecP256K1, NistP192, NistP224, NistP256, NistP384 and NistP521.
+
+	Example:
+	# test-bench.sh run keygen --algorithm EC --transient true --interface jce
+
+
 ## AES Encryption
 AES encryption is supported for all key sizes (128, 192 and 256) and all modes (CBC, GCM, ECB, etc) using JCE Provider Cipher interface. 
 **Note:** These are singlepart Cipher operations.   
@@ -142,6 +162,19 @@ AES decryption is supported for all key sizes (128, 192 and 256) and all modes (
         Example:
         # test-bench.sh run decryption --algorithm AES --keysize 128 --mode GCM --interface jce --filepath filepath
 
+## RSA Sign and Verification
+RSA signing and verification is supported for all key sizes.
+
+	Example:
+	# test-bench.sh run sign --algorithm RSA --keysize 2048 --interface jce
+	# test-bench.sh run verify --algorithm RSA --keysize 2048 --interface jce
+
+## EC Sign and Verification
+We can capture EC sign and verify performance metrics as below:
+
+	Example:
+	# test-bench.sh run sign --algorithm EC --interface jce
+	# test-bench.sh run verify --algorithm EC --interface jce
 
 # Report Location
 Let's assume we have cloned the repo at /opt/rest-api.
