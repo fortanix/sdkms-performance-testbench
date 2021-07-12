@@ -28,7 +28,8 @@ public abstract class SignatureVerificationBaseSampler extends JCEBaseSampler {
     public void setupTest(JavaSamplerContext context) {
         super.setupTest(context);
         String algorithm = context.getParameter(ALGORITHM, "RSA");
-        String keySize = context.getParameter(KEY_SIZE, "1024");
+        String defaultKeySize = algorithm.equalsIgnoreCase("EC") ? "NistP192" : "1024";
+        String keySize = context.getParameter(KEY_SIZE, defaultKeySize);
         String filePath = context.getParameter(FILE_PATH);
         String hashAlgorithm = context.getParameter(HASH_ALGORITHM, "SHA256");
         this.pssParameterDigest = hashAlgorithm;
@@ -48,14 +49,13 @@ public abstract class SignatureVerificationBaseSampler extends JCEBaseSampler {
     private static KeyPair getKeyPair(String algorithm, String keySize) {
         KeyPairGenerator kpg = null;
         try {
-            if(algorithm.equalsIgnoreCase("ECDSA")) {
-                kpg = KeyPairGenerator.getInstance("EC", "sdkms-jce");
-                SecurityObjectParameterSpec parameterSpec = new SecurityObjectParameterSpec((new ECGenParameterSpec(AlgorithmParameters.NistP192)), false);
-                kpg.initialize(new ECGenParameterSpec(AlgorithmParameters.NistP192), null); // spec
+            kpg = KeyPairGenerator.getInstance(algorithm, "sdkms-jce");
+            if(algorithm.equalsIgnoreCase("EC")) {
+                SecurityObjectParameterSpec parameterSpec = new SecurityObjectParameterSpec((new ECGenParameterSpec(getAlgorithmParameter(keySize))), false);
+                kpg.initialize(new ECGenParameterSpec(getAlgorithmParameter(keySize)), null); // spec
                 kpg.initialize(parameterSpec, null);
             }
             else {
-                kpg = KeyPairGenerator.getInstance(algorithm, "sdkms-jce");
                 kpg.initialize(Integer.parseInt(keySize));
                 SecurityObjectParameterSpec parameterSpec = new SecurityObjectParameterSpec(false);
                 kpg.initialize(parameterSpec, null);
@@ -67,7 +67,32 @@ public abstract class SignatureVerificationBaseSampler extends JCEBaseSampler {
     }
 
     private String jceAlgo(String algorithm, String hashAlgorithm) {
-        return hashAlgorithm.toUpperCase() + "with" + algorithm.toUpperCase();
+        return hashAlgorithm.toUpperCase() + "with" + algorithm.toUpperCase() + "DSA";
+    }
+
+    private static String getAlgorithmParameter(String curve) {
+        if (curve.equalsIgnoreCase("SecP192K1")) {
+            return AlgorithmParameters.Secp192k1;
+        } else if (curve.equalsIgnoreCase("SecP224K1")) {
+            return AlgorithmParameters.Secp224k1;
+        } else if (curve.equalsIgnoreCase("SecP256K1")) {
+            return AlgorithmParameters.Secp256k1;
+        } else if (curve.equalsIgnoreCase("NistP192")) {
+            return AlgorithmParameters.NistP192;
+        } else if (curve.equalsIgnoreCase("NistP224")) {
+            return AlgorithmParameters.NistP224;
+        } else if (curve.equalsIgnoreCase("NistP256")) {
+            return AlgorithmParameters.NistP256;
+        } else if (curve.equalsIgnoreCase("NistP384")) {
+            return AlgorithmParameters.NistP384;
+        } else if (curve.equalsIgnoreCase("NistP521")) {
+            return AlgorithmParameters.NistP521;
+        } else if (curve.equalsIgnoreCase("Gost256A")) {
+            return AlgorithmParameters.Gost256A;
+        } else if (curve.equalsIgnoreCase("Ed25519")) {
+            return AlgorithmParameters.Ed25519;
+        }
+        return null;
     }
 
 }
