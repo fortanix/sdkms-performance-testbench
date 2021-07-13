@@ -201,6 +201,13 @@ SDKMS Signature Generation | 1 | 300 | 16020 | 13 | 21 | 26 | 6 | 154 | 0.00% | 
 
 * capacity columns is only supported for AES Encryption/Decryption with provided filepath.
 
+# Connection Pooling
+With JCE Connection Pooling
+
+The environment variable FORTANIX_CONN_MAX is set to the maximum number of connections from that instance of the JCE application.
+
+When the environment variable FORTANIX_CONN_MAX is not exported or is set to `0`, JCE will behave without any connection pooling/limit
+
 
 # Contributing
 
