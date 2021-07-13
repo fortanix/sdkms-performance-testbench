@@ -45,10 +45,12 @@ public class DecryptionSampler extends AbstractEncryptionAndDecryptionSampler {
         this.decryptRequest = this.encryptionDecryptionHelper.createDecryptRequest(cipher, tag);
         BatchDecryptRequestInner batchDecryptRequestInner = new BatchDecryptRequestInner().kid(this.keyId).request(decryptRequest);
 
-        if (this.batchEncryptRequest.size() != 0){
-            this.batchDecryptRequest = new BatchDecryptRequest();
-            for ( int i = 0; i < this.batchEncryptRequest.size() ; i++ ) {
-                this.batchDecryptRequest.add(batchDecryptRequestInner);
+        if(this.batchDecryptRequest != null) {
+            if (this.batchEncryptRequest.size() != 0) {
+                this.batchDecryptRequest = new BatchDecryptRequest();
+                for (int i = 0; i < this.batchEncryptRequest.size(); i++) {
+                    this.batchDecryptRequest.add(batchDecryptRequestInner);
+                }
             }
         }
     }
