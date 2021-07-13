@@ -67,7 +67,10 @@ public abstract class SignatureVerificationBaseSampler extends JCEBaseSampler {
     }
 
     private String jceAlgo(String algorithm, String hashAlgorithm) {
-        return hashAlgorithm.toUpperCase() + "with" + algorithm.toUpperCase() + "DSA";
+        if(algorithm.equalsIgnoreCase("EC")) {
+            return hashAlgorithm.toUpperCase() + "with" + algorithm.toUpperCase() + "DSA";
+        }
+        return hashAlgorithm.toUpperCase() + "with" + algorithm.toUpperCase();
     }
 
     private static String getAlgorithmParameter(String curve) {
