@@ -39,10 +39,12 @@ public class SignatureVerificationSampler extends AbstractSignatureSampler {
 
         this.verifyRequest = new VerifyRequest().hashAlg(digestAlgorithm).hash(this.hash).signature(signature);
         VerifyRequestEx verifyRequestEx = new VerifyRequestEx().hashAlg(digestAlgorithm).hash(this.hash).key(new SobjectDescriptor().kid(this.keyId)).signature(signature);
-        if (this.batchSignRequest.size() != 0) {
-            this.batchVerifyRequest = new BatchVerifyRequest();
-            for ( int i = 0; i < this.batchSignRequest.size() ; i++ ) {
-                this.batchVerifyRequest.add(verifyRequestEx);
+        if(this.batchSignRequest != null) {
+            if (this.batchSignRequest.size() != 0) {
+                this.batchVerifyRequest = new BatchVerifyRequest();
+                for (int i = 0; i < this.batchSignRequest.size(); i++) {
+                    this.batchVerifyRequest.add(verifyRequestEx);
+                }
             }
         }
     }
