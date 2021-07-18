@@ -2,6 +2,7 @@ package com.fortanix.sdkms.performance.sampler.jce;
 
 import com.fortanix.sdkms.jce.provider.AlgorithmParameters;
 import com.fortanix.sdkms.jce.provider.SecurityObjectParameterSpec;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jmeter.protocol.java.sampler.JavaSamplerContext;
 
@@ -11,6 +12,8 @@ import java.nio.file.Paths;
 import java.security.*;
 import java.security.spec.ECGenParameterSpec;
 import java.security.spec.MGF1ParameterSpec;
+import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.logging.Level;
 
 import static com.fortanix.sdkms.performance.sampler.Constants.*;
@@ -33,7 +36,12 @@ public abstract class SignatureVerificationBaseSampler extends JCEBaseSampler {
         String filePath = context.getParameter(FILE_PATH);
         String hashAlgorithm = context.getParameter(HASH_ALGORITHM, "SHA256");
         this.pssParameterDigest = hashAlgorithm;
-        this.input = "random-text";
+       // this.input = "random-text";
+        Random random = ThreadLocalRandom.current();
+        byte[] r = new byte[256]; //Means 2048 bit
+        random.nextBytes(r);
+        String s = Base64.encodeBase64String(r);
+        this.input = s;
         if (StringUtils.isNotEmpty(filePath)) {
             try {
                 input = new String(Files.readAllBytes(Paths.get(filePath)));
