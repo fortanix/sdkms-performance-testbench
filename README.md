@@ -14,7 +14,7 @@ For more information on SDKMS visit [SDKMS Site](https://fortanix.com/products/s
 * [JDK](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
 * [maven](https://maven.apache.org/download.cgi)
 
-
+## Manual environment setup
 * Following environment variables need to be set:
 
 	 `FORTANIX_API_KEY=<Fortanix SDKMS API KEY>`
@@ -30,6 +30,58 @@ For more information on SDKMS visit [SDKMS Site](https://fortanix.com/products/s
 
 	> FORTANIX\_API\_ENDPOINT is optional and default to https://apps.sdkms.fortanix.com .
  	> SDKMS\_SSL\_TRUST_STORE is needed only for on-premises deployments.
+
+## Automatic environment setup
+### *Dependencies*
+* [Python3](https://www.python.org/downloads/)
+
+### *Usage*
+Basic usage with random user, account details and test endpoint to export the env file. Default endpoint used will be [sdkms.test.fortanix.com](sdkms.test.fortanix.com)
+```
+python setup_script.py
+```
+
+Optional Arguments to create a user with particular email and password or using existing account ID, group ID or app ID.
+
+```
+-h, --help
+		Show the help messages
+
+-e, --endpoint
+		Endpoint to be used for fetching certificates, generating keystore and calling APIs
+
+-u, --email
+		Email ID to be used for signing up/logging in
+
+-p, --password
+		Password to be used for signing up/logging in
+
+-c, --create
+		Flag to create new user with given email and password
+
+-a, --account
+		Account ID to be used for generating API Key
+
+-g, --group
+		Group ID to be used for generating API Key
+
+-x, --app
+		App ID to be used for generating API Key
+```
+
+### *Example*
+
+* Run the script with optional arguments, if any
+
+```
+python setup_script.py -e sdkms.test.fortanix.com
+```
+
+* It will generate an env file, which can be sourced to set all necessary environment variables
+
+```
+source ./env
+```
 
 # Setup performance Test bench
 ## Build

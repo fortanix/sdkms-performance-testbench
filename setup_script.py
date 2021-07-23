@@ -76,7 +76,7 @@ def get_certificate(host, port, cert_file_pathname):
 
 
 # Default endpoint to get certificate
-CERTIFICATE_ENDPOINT = "sdkms.fortanix.com"
+CERTIFICATE_ENDPOINT = "sdkms.test.fortanix.com"
 
 
 if __name__ == '__main__':
@@ -196,7 +196,7 @@ if __name__ == '__main__':
             'user_password': test_password,
             'first_name': first_name,
             'last_name': last_name,
-            'recaptcha_response': 'true',
+            'recaptcha_response': '03AOP2lf58wnS5HqYUreAVBIKqGKMFTJJ_ZO5-1qdZkzAu-upL9nvCCGx9AKit4yzZWDoMLnjjHbs71SjKEDfiNeXKggD7K0OiWjABVErMlt0zruF1VlBh3Wa_uWNbBvGKzNh4dYLthra_V7lwOsPPS0mP1EXPhMp9BVLRCZOtHl6wYZKpjWbDHvQtW3YQGl2Y11YqVAKdekSmT6r_Kct3uuESk5Iltmg34j9HsJ8ONuoo4bzn7moy3SOjE060XyGqu5z2VPv3oVPwEhQdqOM2sbAg9ZdMNwUMgw16e4uRKeJsf45xlGyg6WU',
         }
 
         try:
@@ -205,17 +205,18 @@ if __name__ == '__main__':
         except:
             print('Error: User creation request failed.')
             exit(1)
-    
+
     if user_creation_response.status_code >= 400:
         print(user_creation_response.text)
-        print('Status - {} | Error: User creation request failed.'.format(user_creation_response.status_code))
+        print('Status - {} | Error: User creation request failed.'.format(
+            user_creation_response.status_code))
         exit(1)
 
     basic_token = test_email + ':' + test_password
     basic_token = basic_token.encode('ascii')
     basic_token = base64.b64encode(basic_token)
     basic_token = basic_token.decode('ascii')
-    print(user_details)
+
     try:
         user_auth_response = requests.post(
             API_ENDPOINT+'/sys/v1/session/auth', headers={'Authorization': 'Basic {}'.format(basic_token)})
