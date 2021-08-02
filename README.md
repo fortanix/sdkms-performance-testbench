@@ -36,9 +36,10 @@ For more information on SDKMS visit [SDKMS Site](https://fortanix.com/products/s
 * [Python3](https://www.python.org/downloads/)
 
 ### *Usage*
-Basic usage with random user, account details and test endpoint to export the env file. Default endpoint used will be [sdkms.test.fortanix.com](sdkms.test.fortanix.com)
+Basic usage with random user, account details and test endpoint to export the env file.
+Minimum python version required is 3.7.
 ```
-python setup_script.py
+python3.7 setup_script.py
 ```
 
 Optional Arguments to create a user with particular email and password or using existing account ID, group ID or app ID.

@@ -75,9 +75,7 @@ def get_certificate(host, port, cert_file_pathname):
         exit(1)
 
 
-# Default endpoint to get certificate
-CERTIFICATE_ENDPOINT = "sdkms.test.fortanix.com"
-
+CERTIFICATE_ENDPOINT = ""
 
 if __name__ == '__main__':
     desc = "Performance Bench Setup Script"
@@ -104,6 +102,9 @@ if __name__ == '__main__':
         url = urllib.parse.urlparse(endpoint)
         netloc = url.netloc or url.path
         CERTIFICATE_ENDPOINT = netloc.split('/')[0]
+    else:
+        print('Error: -e <endpoint> is required')
+        exit(1)
 
     domain = '.'.join(CERTIFICATE_ENDPOINT.split('.')[-2:])
 
@@ -195,8 +196,7 @@ if __name__ == '__main__':
             'user_email': test_email,
             'user_password': test_password,
             'first_name': first_name,
-            'last_name': last_name,
-            'recaptcha_response': '03AOP2lf58wnS5HqYUreAVBIKqGKMFTJJ_ZO5-1qdZkzAu-upL9nvCCGx9AKit4yzZWDoMLnjjHbs71SjKEDfiNeXKggD7K0OiWjABVErMlt0zruF1VlBh3Wa_uWNbBvGKzNh4dYLthra_V7lwOsPPS0mP1EXPhMp9BVLRCZOtHl6wYZKpjWbDHvQtW3YQGl2Y11YqVAKdekSmT6r_Kct3uuESk5Iltmg34j9HsJ8ONuoo4bzn7moy3SOjE060XyGqu5z2VPv3oVPwEhQdqOM2sbAg9ZdMNwUMgw16e4uRKeJsf45xlGyg6WU',
+            'last_name': last_name
         }
 
         try:
@@ -321,7 +321,8 @@ if __name__ == '__main__':
         env_file.write('export SDKMS_API_ENDPOINT={}\n'.format(API_ENDPOINT))
         env_file.write(
             'export FORTANIX_API_ENDPOINT={}\n'.format(API_ENDPOINT))
-        env_file.write('export SDKMS_SSL_TRUST_STORE={}\n'.format(
-            'keystore/keystore1.jks'))
-        env_file.write('export FORTANIX_SSL_TRUST_STORE={}\n'.format(
-            'keystore/keystore1.jks'))
+        env_file.write('export SDKMS_SSL_TRUST_STORE={}/{}\n'.format(
+            os.getcwd(), 'keystore/keystore1.jks'))
+        env_file.write('export FORTANIX_SSL_TRUST_STORE={}/{}\n'.format(
+            os.getcwd(), 'keystore/keystore1.jks'))
+    print('env file created. source ./env - before running test-bench')

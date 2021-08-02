@@ -1,5 +1,13 @@
 #!/bin/bash
 
+set -eo pipefail
+  
+if [ ! -f $PWD/env ]; then
+   echo "env file missing. Run python3.7 ./setup_script.py - to create"
+   exit
+fi
+source $PWD/env
+
 # Redirect messages to stderr
 function error() {
     (>&2 echo "[E] $*")
@@ -225,8 +233,13 @@ function print_end(){
 }
 
 function tb_operation() {
+    if [ -z "$1" ]; then
+       ARG1="--help"
+    else
+       ARG1=$1
+    fi
     # convert to lower-case
-    key=$(echo "$1" | tr '[:upper:]' '[:lower:]')
+    key=$(echo "$ARG1" | tr '[:upper:]' '[:lower:]')
     case ${key} in
         build)
             opt="build_task"
