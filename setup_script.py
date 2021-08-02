@@ -201,7 +201,7 @@ if __name__ == '__main__':
 
         try:
             user_creation_response = requests.post(
-                API_ENDPOINT+'/sys/v1/users', json=user_creation_request)
+                API_ENDPOINT+'/sys/v1/users', json=user_creation_request, verify=False)
         except:
             print('Error: User creation request failed.')
             exit(1)
@@ -219,7 +219,7 @@ if __name__ == '__main__':
 
     try:
         user_auth_response = requests.post(
-            API_ENDPOINT+'/sys/v1/session/auth', headers={'Authorization': 'Basic {}'.format(basic_token)})
+            API_ENDPOINT+'/sys/v1/session/auth', headers={'Authorization': 'Basic {}'.format(basic_token)}, verify=False)
     except:
         print('Error: User auth request failed.')
         exit(1)
@@ -240,7 +240,7 @@ if __name__ == '__main__':
 
         try:
             user_account_response = requests.post(API_ENDPOINT+'/sys/v1/accounts', headers={
-                'Authorization': 'Bearer {}'.format(access_token)}, json=user_account_request)
+                'Authorization': 'Bearer {}'.format(access_token)}, json=user_account_request, verify=False)
         except:
             print('Error: User auth request failed.')
             exit(1)
@@ -255,7 +255,7 @@ if __name__ == '__main__':
 
     try:
         user_account_select_res = requests.post(API_ENDPOINT+'/sys/v1/session/select_account', headers={
-                                                'Authorization': 'Bearer {}'.format(access_token)}, json=user_account_select_req)
+                                                'Authorization': 'Bearer {}'.format(access_token)}, json=user_account_select_req, verify=False)
     except:
         print('Error: User auth request failed.')
         exit(1)
@@ -272,7 +272,7 @@ if __name__ == '__main__':
 
         try:
             group_creation_response = requests.post(API_ENDPOINT+'/sys/v1/groups', headers={
-                                                    'Authorization': 'Bearer {}'.format(access_token)}, json=group_creation_request)
+                                                    'Authorization': 'Bearer {}'.format(access_token)}, json=group_creation_request, verify=False)
         except:
             print('Error: User auth request failed.')
             exit(1)
@@ -293,7 +293,7 @@ if __name__ == '__main__':
 
         try:
             app_creation_response = requests.post(API_ENDPOINT+'/sys/v1/apps', headers={
-                'Authorization': 'Bearer {}'.format(access_token)}, json=app_creation_request)
+                'Authorization': 'Bearer {}'.format(access_token)}, json=app_creation_request, verify=False)
         except:
             print('Error: User auth request failed.')
             exit(1)
@@ -304,7 +304,7 @@ if __name__ == '__main__':
 
     try:
         app_secret_response = requests.get(API_ENDPOINT+'/sys/v1/apps/' + app_id + '/credential', headers={
-            'Authorization': 'Bearer {}'.format(access_token)})
+            'Authorization': 'Bearer {}'.format(access_token)}, verify=False)
     except:
         print('Error: User auth request failed.')
         exit(1)
