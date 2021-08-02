@@ -196,8 +196,7 @@ if __name__ == '__main__':
             'user_email': test_email,
             'user_password': test_password,
             'first_name': first_name,
-            'last_name': last_name,
-            'recaptcha_response': '03AOP2lf58wnS5HqYUreAVBIKqGKMFTJJ_ZO5-1qdZkzAu-upL9nvCCGx9AKit4yzZWDoMLnjjHbs71SjKEDfiNeXKggD7K0OiWjABVErMlt0zruF1VlBh3Wa_uWNbBvGKzNh4dYLthra_V7lwOsPPS0mP1EXPhMp9BVLRCZOtHl6wYZKpjWbDHvQtW3YQGl2Y11YqVAKdekSmT6r_Kct3uuESk5Iltmg34j9HsJ8ONuoo4bzn7moy3SOjE060XyGqu5z2VPv3oVPwEhQdqOM2sbAg9ZdMNwUMgw16e4uRKeJsf45xlGyg6WU',
+            'last_name': last_name
         }
 
         try:
