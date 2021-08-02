@@ -76,6 +76,7 @@ def get_certificate(host, port, cert_file_pathname):
 
 
 CERTIFICATE_ENDPOINT = ""
+disable_ssl = False
 
 if __name__ == '__main__':
     desc = "Performance Bench Setup Script"
@@ -95,7 +96,12 @@ if __name__ == '__main__':
         "-g", "--group", help="Group ID to use for creating API key")
     parser.add_argument(
         "-x", "--app", help="App ID to use for creating API key")
+    parser.add_argument(
+        "--insecure", help="Flag to disable SSL validations", action="store_true")
     args = parser.parse_args()
+
+    if args.insecure:
+        disable_ssl = True
 
     if args.endpoint:
         endpoint = args.endpoint
@@ -107,7 +113,7 @@ if __name__ == '__main__':
         exit(1)
 
     domain = '.'.join(CERTIFICATE_ENDPOINT.split('.')[-2:])
-
+    
     user_details = {
         'create': True,
         'email': ''.join(secrets.choice(
@@ -201,10 +207,13 @@ if __name__ == '__main__':
 
         try:
             user_creation_response = requests.post(
-                API_ENDPOINT+'/sys/v1/users', json=user_creation_request, verify=False)
-        except:
-            print('Error: User creation request failed.')
+                API_ENDPOINT+'/sys/v1/users', json=user_creation_request, verify=not disable_ssl)
+        except requests.exceptions.SSLError as err:
+            print(
+                'Certificate cannot be verified. Use --insecure if you want to continue ignoring the error')
             exit(1)
+        except requests.exceptions.HTTPError as err:
+            SystemExit(err)
 
     if user_creation_response.status_code >= 400:
         print(user_creation_response.text)
@@ -219,10 +228,12 @@ if __name__ == '__main__':
 
     try:
         user_auth_response = requests.post(
-            API_ENDPOINT+'/sys/v1/session/auth', headers={'Authorization': 'Basic {}'.format(basic_token)}, verify=False)
-    except:
-        print('Error: User auth request failed.')
+            API_ENDPOINT+'/sys/v1/session/auth', headers={'Authorization': 'Basic {}'.format(basic_token)}, verify=not disable_ssl)
+    except requests.exceptions.SSLError as err:
+        print('Certificate cannot be verified. Use --insecure if you want to continue ignoring the error')
         exit(1)
+    except requests.exceptions.HTTPError as err:
+        SystemExit(err)
 
     if user_auth_response.status_code >= 400:
         print(user_auth_response.text)
@@ -240,10 +251,13 @@ if __name__ == '__main__':
 
         try:
             user_account_response = requests.post(API_ENDPOINT+'/sys/v1/accounts', headers={
-                'Authorization': 'Bearer {}'.format(access_token)}, json=user_account_request, verify=False)
-        except:
-            print('Error: User auth request failed.')
+                'Authorization': 'Bearer {}'.format(access_token)}, json=user_account_request, verify=not disable_ssl)
+        except requests.exceptions.SSLError as err:
+            print(
+                'Certificate cannot be verified. Use --insecure if you want to continue ignoring the error')
             exit(1)
+        except requests.exceptions.HTTPError as err:
+            SystemExit(err)
 
         user_account_id = user_account_response.json()['acct_id']
     else:
@@ -255,10 +269,12 @@ if __name__ == '__main__':
 
     try:
         user_account_select_res = requests.post(API_ENDPOINT+'/sys/v1/session/select_account', headers={
-                                                'Authorization': 'Bearer {}'.format(access_token)}, json=user_account_select_req, verify=False)
-    except:
-        print('Error: User auth request failed.')
+                                                'Authorization': 'Bearer {}'.format(access_token)}, json=user_account_select_req, verify=not disable_ssl)
+    except requests.exceptions.SSLError as err:
+        print('Certificate cannot be verified. Use --insecure if you want to continue ignoring the error')
         exit(1)
+    except requests.exceptions.HTTPError as err:
+        SystemExit(err)
 
     group_id = ''
 
@@ -272,10 +288,13 @@ if __name__ == '__main__':
 
         try:
             group_creation_response = requests.post(API_ENDPOINT+'/sys/v1/groups', headers={
-                                                    'Authorization': 'Bearer {}'.format(access_token)}, json=group_creation_request, verify=False)
-        except:
-            print('Error: User auth request failed.')
+                                                    'Authorization': 'Bearer {}'.format(access_token)}, json=group_creation_request, verify=not disable_ssl)
+        except requests.exceptions.SSLError as err:
+            print(
+                'Certificate cannot be verified. Use --insecure if you want to continue ignoring the error')
             exit(1)
+        except requests.exceptions.HTTPError as err:
+            SystemExit(err)
 
         group_id = group_creation_response.json()['group_id']
     else:
@@ -293,10 +312,13 @@ if __name__ == '__main__':
 
         try:
             app_creation_response = requests.post(API_ENDPOINT+'/sys/v1/apps', headers={
-                'Authorization': 'Bearer {}'.format(access_token)}, json=app_creation_request, verify=False)
-        except:
-            print('Error: User auth request failed.')
+                'Authorization': 'Bearer {}'.format(access_token)}, json=app_creation_request, verify=not disable_ssl)
+        except requests.exceptions.SSLError as err:
+            print(
+                'Certificate cannot be verified. Use --insecure if you want to continue ignoring the error')
             exit(1)
+        except requests.exceptions.HTTPError as err:
+            SystemExit(err)
 
         app_id = app_creation_response.json()['app_id']
     else:
@@ -304,10 +326,12 @@ if __name__ == '__main__':
 
     try:
         app_secret_response = requests.get(API_ENDPOINT+'/sys/v1/apps/' + app_id + '/credential', headers={
-            'Authorization': 'Bearer {}'.format(access_token)}, verify=False)
-    except:
-        print('Error: User auth request failed.')
+            'Authorization': 'Bearer {}'.format(access_token)}, verify=not disable_ssl)
+    except requests.exceptions.SSLError as err:
+        print('Certificate cannot be verified. Use --insecure if you want to continue ignoring the error')
         exit(1)
+    except requests.exceptions.HTTPError as err:
+        SystemExit(err)
 
     app_secret = app_secret_response.json()['credential']['secret']
     app_api_key = app_id + ':' + app_secret
