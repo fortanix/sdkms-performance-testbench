@@ -68,6 +68,9 @@ Optional Arguments to create a user with particular email and password or using 
 
 -x, --app
 		App ID to be used for generating API Key
+
+--insecure
+		Flag to disable SSL certificate validations
 ```
 
 ### *Example*
