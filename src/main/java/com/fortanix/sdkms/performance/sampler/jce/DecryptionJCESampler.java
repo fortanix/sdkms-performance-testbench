@@ -5,8 +5,11 @@ import org.apache.jmeter.protocol.java.sampler.JavaSamplerContext;
 import org.apache.jmeter.samplers.SampleResult;
 
 import javax.crypto.Cipher;
+import java.security.Key;
 import java.security.ProviderException;
 import java.util.logging.Level;
+
+import static com.fortanix.sdkms.performance.sampler.Constants.ALGORITHM;
 
 public class DecryptionJCESampler extends EncryptDecryptBaseJCESampler {
 
@@ -18,7 +21,13 @@ public class DecryptionJCESampler extends EncryptDecryptBaseJCESampler {
     public void setupTest(JavaSamplerContext context) {
         super.setupTest(context);
         try {
-            this.cipher.init(Cipher.ENCRYPT_MODE, this.key, this.params);
+            String algorithm = context.getParameter(ALGORITHM, "AES");
+            if(algorithm.equals("RSA")) {
+                this.cipher.init(Cipher.ENCRYPT_MODE, this.keyPair.getPrivate(), this.params);
+            }
+            else {
+                this.cipher.init(Cipher.ENCRYPT_MODE, this.key, this.params);
+            }
             if(mode.equals(CryptMode.GCM)) {
                 this.cipher.updateAAD(AAD.getBytes());
             }
@@ -34,7 +43,15 @@ public class DecryptionJCESampler extends EncryptDecryptBaseJCESampler {
         SampleResult result = new SampleResult();
         result.sampleStart();
         try {
-            this.cipher.init(Cipher.DECRYPT_MODE, this.key, this.params);
+            String algorithm = javaSamplerContext.getParameter(ALGORITHM, "AES");
+            Key key = null;
+            if(algorithm.equals("RSA")) {
+                key = this.keyPair.getPublic();
+            }
+            else{
+                key = this.key;
+            }
+            this.cipher.init(Cipher.DECRYPT_MODE, key, this.params);
             if(mode.equals(CryptMode.GCM)) {
                 cipher.updateAAD(AAD.getBytes());
             }
