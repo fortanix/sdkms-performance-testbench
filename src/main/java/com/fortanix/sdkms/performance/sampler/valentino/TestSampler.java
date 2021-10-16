@@ -1,15 +1,17 @@
 package com.fortanix.sdkms.performance.sampler.valentino;
 
-import com.fortanix.sdkms.performance.sampler.AbstractSDKMSSamplerClient;
-import com.fortanix.valentino.Valentino;
-import com.fortanix.valentino.ValentinoException;
+import com.fortanix.valentino.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.jmeter.protocol.java.sampler.AbstractJavaSamplerClient;
 import org.apache.jmeter.protocol.java.sampler.JavaSamplerContext;
 import org.apache.jmeter.samplers.SampleResult;
 
-import java.security.ProviderException;
+import java.util.Base64;
+import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import static com.fortanix.sdkms.performance.sampler.Constants.ALGORITHM;
+import static com.fortanix.sdkms.performance.sampler.Constants.MODE;
 
 public class TestSampler extends AbstractJavaSamplerClient {
 
@@ -50,12 +52,43 @@ public class TestSampler extends AbstractJavaSamplerClient {
     }
 
     @Override
-    public SampleResult runTest(JavaSamplerContext javaSamplerContext) {
+    public SampleResult runTest(JavaSamplerContext context) {
+        EncryptRequest encryptRequest = new EncryptRequest();
+        String keyName = context.getParameter(KEYNAME);
+        String algorithm = context.getParameter(ALGORITHM);
+        String mode = context.getParameter(MODE);
+        Kid kid = null;
+        try {
+            System.out.println("Looking up kid with name : " + keyName);
+            kid = valentino.lookup("Valentino");
+        } catch (ValentinoException e) {
+            e.printStackTrace();
+        }
+
+        byte[] plain = Base64.getEncoder().encode("YWJj".getBytes());
         SampleResult result = new SampleResult();
         result.sampleStart();
-        int a=1;
+        try {
+            EncryptResponse encryptResp = valentino.encrypt(EncryptRequest.builder()
+                    .setKid(kid)
+                    .setPlain(plain)
+                    .setAlg(Algorithm.AES)
+                    .setMode(CipherMode.CBC)
+                    .build());
+        } catch (ValentinoException e) {
+            e.printStackTrace();
+        }
         result.setSuccessful(true);
         result.sampleEnd();
         return result;
     }
+
+    public void teardownTest(JavaSamplerContext context) {
+        try {
+            this.valentino.terminate();
+        } catch (ValentinoException e) {
+            LOGGER.log(Level.INFO, "failure in logging out : " + e.getMessage(), e);
+        }
+    }
+
 }
