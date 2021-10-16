@@ -410,6 +410,47 @@ function decryption_task() {
     print_end $FILE_NAME $OPERATION
 }
 
+function valentino_encryption_task() {
+    if [ "$1" == "${HELP}" ];
+    then
+        echo "decryption captures metrics for RSA,DES,DES3,AES and Tokenization key Decryption"
+        echo "   usage:"
+        echo "   # ${SCRIPT_NAME} run decryption [--algorithm RSA|AES|DES|DES3] [--keysize 1024|2048] [--interface sdk|jce] [--mode CBC] [--filepath </path/to/file>] [--threadcount 50|100] [--time 300|600]"
+        echo "   options:"
+        echo "   --algorithm    Decryption algorithm. Supported algorithms are RSA and AES."
+        echo "                  default value is RSA."
+        echo "   --keyName      keysize for the provided algorithm."
+        echo "                  Supported keysize RSA: '1024 to 8192', AES: '128, 192, or 256', DES: 56 and DES3: 168."
+        echo "                  default value is 1024."
+        echo "   --interface    interface for performing the operation. Values: sdk, jce"
+        echo "                  Default interface is sdk."
+        echo "   --mode         [Optional] encryption mode, only for AES algorithm. Values: ECB, CBC, CBCNOPAD, CFB, CTR, GCM, CCM, FPE"
+        echo "                  Default value is CBC."
+        echo "   --batchsize    Create a batch decrypt request with the provided batch size."
+        echo "                  Default is 0 (non batch) single verify request."
+        echo "   --filepath     Input plain text file, the cipher of which to be used for decryption. By default a random string is used"
+        echo "   --threadcount  Number of concurrent threads per second to be executed."
+        echo "                  default value is 50."
+        echo "   --time         Time in seconds to hold the jmeter execution."
+        echo "                  default value is 300."
+		echo "   --file-idf     A distinct identifier to add to the output CSV file for easy identification."
+        echo "                  helps in cases when there are multiple consecutive executions of the same operation."
+		echo "                  prevents the older CSV from getting overwritten by the new output file. Adds an epoch timestamp at the end of filename by default."
+        echo ""
+        echo "One can also pass proxy(http/https) related jvm args as a csv string: --jvm-args '-Dhttps.proxyHost=proxy,-Dhttps.proxyPort=8080,-Dhttps.proxyUser=user,-Dhttps.proxyPassword=pwd'"
+        return
+    fi
+    info "Decryption operation is selected"
+    FILE_NAME=SDKMS_REST_API_DECRYPTION
+    OPERATION=DECRYPTION
+    validate
+    get_input ${@:1}
+    update_jmx "/src/test/jmeter/encrypt-sdk-template.jmx" "/target/jmx/"$FILE_NAME".jmx"
+    print_start
+    mvn verify -Djmx.path="target/jmx" $JVM_ARGS
+    print_end $FILE_NAME $OPERATION
+}
+
 function sign_task() {
     if [ "$1" == "${HELP}" ];
     then
@@ -445,6 +486,86 @@ function sign_task() {
     validate
     get_input ${@:1}
     update_jmx "/src/test/jmeter/sign-generate-${INTERFACE}-template.jmx" "/target/jmx/"$FILE_NAME".jmx"
+    print_start
+    mvn verify -Djmx.path="target/jmx" $JVM_ARGS
+    print_end $FILE_NAME $OPERATION
+}
+
+function signn_task() {
+    if [ "$1" == "${HELP}" ];
+    then
+        echo "sign captures metrics for RSA or EC signature generation"
+        echo "   usage:"
+        echo "   # ${SCRIPT_NAME} run sign [--algorithm RSA|EC] [--keysize 1024|2048] [--interface sdk|jce] [--filepath </path/to/file>] [--threadcount 50|100] [--time 300|600] [--batchsize 10|100|1000]"
+        echo "   options:"
+        echo "   --algorithm       Signature generation algorithm. Supported algorithms are RSA and EC"
+        echo "                     default value is RSA."
+        echo "   --keysize         keysize or curve name for signature generation algorithm. Supported keysize are 1024 to 8192"
+        echo "                     EC supported curves: SecP192K1, SecP224K1, SecP256K1, NistP192, NistP224, NistP256, NistP384, NistP521"
+        echo "                     default value is 1024."
+        echo "   --interface       interface for performing the operation. Values: sdk, jce"
+        echo "                     Default interface is sdk."
+        echo "   --filepath        Input plain text file to use for signing. By default a random string is used"
+        echo "   --hash-algorithm  Message digest algorithm. Supported algorithm are SHA1, SHA256, SHA384, SHA512"
+        echo "   --threadcount     Number of concurrent threads per second to be executed."
+        echo "                     default value is 50."
+        echo "   --time            Time in seconds to hold the jmeter execution."
+        echo "                     default value is 300."
+        echo "   --batchsize       Create a batch sign request with the provided batch size."
+        echo "                     Default is 0 (non batch) single sign request."
+		echo "   --file-idf        A distinct identifier to add to the output CSV file for easy identification."
+        echo "                     helps in cases when there are multiple consecutive executions of the same operation."
+		echo "                     prevents the older CSV from getting overwritten by the new output file. Adds an epoch timestamp at the end of filename by default."
+        echo ""
+        echo "One can also pass proxy(http/https) related jvm args as a csv string: --jvm-args '-Dhttps.proxyHost=proxy,-Dhttps.proxyPort=8080,-Dhttps.proxyUser=user,-Dhttps.proxyPassword=pwd'"
+        return
+    fi
+    info "Sign operation is selected"
+    FILE_NAME=SDKMS_REST_API_SIGN
+    OPERATION=SIGN
+    validate
+    get_input ${@:1}
+    update_jmx "/src/test/jmeter/encrypt-valentino-template.jmx" "/target/jmx/"$FILE_NAME".jmx"
+    print_start
+    mvn verify -Djmx.path="target/jmx" $JVM_ARGS
+    print_end $FILE_NAME $OPERATION
+}
+
+function encrypt_valentino_task() {
+    if [ "$1" == "${HELP}" ];
+    then
+        echo "sign captures metrics for RSA or EC signature generation"
+        echo "   usage:"
+        echo "   # ${SCRIPT_NAME} run sign [--algorithm RSA|EC] [--keysize 1024|2048] [--interface sdk|jce] [--filepath </path/to/file>] [--threadcount 50|100] [--time 300|600] [--batchsize 10|100|1000]"
+        echo "   options:"
+        echo "   --algorithm       Signature generation algorithm. Supported algorithms are RSA and EC"
+        echo "                     default value is RSA."
+        echo "   --keysize         keysize or curve name for signature generation algorithm. Supported keysize are 1024 to 8192"
+        echo "                     EC supported curves: SecP192K1, SecP224K1, SecP256K1, NistP192, NistP224, NistP256, NistP384, NistP521"
+        echo "                     default value is 1024."
+        echo "   --interface       interface for performing the operation. Values: sdk, jce"
+        echo "                     Default interface is sdk."
+        echo "   --filepath        Input plain text file to use for signing. By default a random string is used"
+        echo "   --hash-algorithm  Message digest algorithm. Supported algorithm are SHA1, SHA256, SHA384, SHA512"
+        echo "   --threadcount     Number of concurrent threads per second to be executed."
+        echo "                     default value is 50."
+        echo "   --time            Time in seconds to hold the jmeter execution."
+        echo "                     default value is 300."
+        echo "   --batchsize       Create a batch sign request with the provided batch size."
+        echo "                     Default is 0 (non batch) single sign request."
+		echo "   --file-idf        A distinct identifier to add to the output CSV file for easy identification."
+        echo "                     helps in cases when there are multiple consecutive executions of the same operation."
+		echo "                     prevents the older CSV from getting overwritten by the new output file. Adds an epoch timestamp at the end of filename by default."
+        echo ""
+        echo "One can also pass proxy(http/https) related jvm args as a csv string: --jvm-args '-Dhttps.proxyHost=proxy,-Dhttps.proxyPort=8080,-Dhttps.proxyUser=user,-Dhttps.proxyPassword=pwd'"
+        return
+    fi
+    info "Sign operation is selected"
+    FILE_NAME=SDKMS_REST_API_SIGN
+    OPERATION=SIGN
+    validate
+    get_input ${@:1}
+    update_jmx "/src/test/jmeter/encrypt-valentino-template.jmx" "/target/jmx/"$FILE_NAME".jmx"
     print_start
     mvn verify -Djmx.path="target/jmx" $JVM_ARGS
     print_end $FILE_NAME $OPERATION
@@ -607,6 +728,9 @@ function run_task(){
         sign)
             task="sign_task"
             ;;
+        signn)
+            task="signn_task"
+            ;;
         verify)
             task="verify_task"
             ;;
@@ -618,6 +742,12 @@ function run_task(){
             ;;
         plugin)
             task="plugin_task"
+            ;;
+        encryption-valentino)
+            task="valentino_encryption_task"
+            ;;
+        valentino-encryption)
+            task="encrypt_valentino_task"
             ;;
         --help)
             echo " run supports four subcommands, encryption, keygen, sign and verify respectively."
