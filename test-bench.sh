@@ -33,6 +33,8 @@ TRANSIENT_TEXT="##Transient##"
 FILEPATH_TEXT="##FilePath##"
 MODE_TEXT="##Mode##"
 KEYNAME_TEXT="##Keyname##"
+CIPHER_TEXT="##Cipher##"
+IV_TEXT="##Iv##"
 PLAIN_TEXT="##Plain##"
 PLUGIN_TYPE_TEXT="##pluginType##"
 PLUGIN_ID_TEXT="##pluginId##"
@@ -51,6 +53,8 @@ TRANSIENT="false"
 FILEPATH=""
 MODE=""
 KEYNAME=""
+CIPHER=""
+IV=""
 PLAIN=""
 MAX_FILE=""
 PLUGIN_TYPE=""
@@ -81,6 +85,8 @@ function update_jmx(){
     sed -i.bak s/$MODE_TEXT/$MODE/g $JMX_FILE
     sed -i.bak s/$KEYNAME_TEXT/$KEYNAME/g $JMX_FILE
     sed -i.bak s/$PLAIN_TEXT/$PLAIN/g $JMX_FILE
+    sed -i.bak s/$CIPHER_TEXT/$CIPHER/g $JMX_FILE
+    sed -i.bak s/$IV_TEXT/$IV/g $JMX_FILE
     if [[ "${MAX_FILE}" == "true" ]]; then
         FILEPATH=$SDKMS_REST_API_HOME"/src/test/resources/LargeFile.txt"
     fi
@@ -160,6 +166,12 @@ while [ $# -gt 0 ]; do
       ;;
     --plain)
       PLAIN="$2"
+      ;;
+    --cipher)
+      CIPHER="$2"
+      ;;
+    --iv)
+      IV="$2"
       ;;
     --max-file)
       MAX_FILE="$2"

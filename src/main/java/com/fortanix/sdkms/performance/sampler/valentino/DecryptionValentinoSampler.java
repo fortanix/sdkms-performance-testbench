@@ -19,6 +19,8 @@ public class DecryptionValentinoSampler extends AbstractJavaSamplerClient {
     private static final String FORTANIX_API_ENDPOINT = "FORTANIX_API_ENDPOINT";
     private static final String FORTANIX_API_KEY = "FORTANIX_API_KEY";
     private static final String KEYNAME = "keyName";
+    private static final String CIPHER = "cipher";
+    private static final String IV = "iv";
     Valentino valentino;
 
     protected void login() throws ValentinoException {
@@ -55,20 +57,19 @@ public class DecryptionValentinoSampler extends AbstractJavaSamplerClient {
         String keyName = context.getParameter(KEYNAME);
         String algorithm = context.getParameter(ALGORITHM);
         String mode = context.getParameter(MODE);
+        String cipherBase64 = context.getParameter(CIPHER);
+        String ivBase64 = context.getParameter(IV);
         Kid kid = null;
         SampleResult result = new SampleResult();
         result.sampleStart();
         try {
             System.out.println("Looking up kid with name : " + keyName);
-            kid = valentino.lookup("Valentino");
+            kid = valentino.lookup(keyName);
         } catch (ValentinoException e) {
             e.printStackTrace();
         }
-        byte[] plain = Base64.getDecoder().decode("ccdoxGvkDVd0mjfQtB==".getBytes());
-        byte[] iv = Base64.getDecoder().decode("EUcRsWGVG827XlamU2dXvg==".getBytes());
-
-//        byte[] plain = "[B@191fa6f91111".getBytes();
-//        byte[] iv = "[B@73dc0b8a".getBytes();
+        byte[] plain = Base64.getDecoder().decode(cipherBase64.getBytes());
+        byte[] iv = Base64.getDecoder().decode(ivBase64.getBytes());
 
         LOGGER.info("Decrypting request: {" +plain+ "} with kid: {"+kid+"}");
         DecryptResponse decryptResp = null;
@@ -76,8 +77,8 @@ public class DecryptionValentinoSampler extends AbstractJavaSamplerClient {
             decryptResp = valentino.decrypt(DecryptRequest.builder()
                     .setKid(kid)
                     .setCipher(plain)
-                    .setAlg(Algorithm.AES)
-                    .setMode(CipherMode.CBC)
+                    .setAlg(Algorithm.valueOf(algorithm))
+                    .setMode(CipherMode.valueOf(mode))
                     .setIv(iv)
                     .build());
         } catch (ValentinoException e) {
