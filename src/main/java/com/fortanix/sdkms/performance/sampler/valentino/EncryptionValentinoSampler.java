@@ -20,6 +20,7 @@ public class EncryptionValentinoSampler extends AbstractJavaSamplerClient {
     private static final String FORTANIX_API_ENDPOINT = "FORTANIX_API_ENDPOINT";
     private static final String FORTANIX_API_KEY = "FORTANIX_API_KEY";
     private static final String KEYNAME = "keyName";
+    private static final String PLAIN = "plain";
     Valentino valentino;
 
     protected void login() throws ValentinoException {
@@ -57,23 +58,24 @@ public class EncryptionValentinoSampler extends AbstractJavaSamplerClient {
         String keyName = context.getParameter(KEYNAME);
         String algorithm = context.getParameter(ALGORITHM);
         String mode = context.getParameter(MODE);
+        String plainBase64 = context.getParameter(PLAIN);
         Kid kid = null;
         try {
             System.out.println("Looking up kid with name : " + keyName);
-            kid = valentino.lookup("Valentino");
+            kid = valentino.lookup(keyName);
         } catch (ValentinoException e) {
             e.printStackTrace();
         }
 
-        byte[] plain = Base64.getEncoder().encode("YWJj".getBytes());
+        byte[] plain = Base64.getEncoder().encode(plainBase64.getBytes());
         SampleResult result = new SampleResult();
         result.sampleStart();
         try {
             EncryptResponse encryptResp = valentino.encrypt(EncryptRequest.builder()
                     .setKid(kid)
                     .setPlain(plain)
-                    .setAlg(Algorithm.AES)
-                    .setMode(CipherMode.CBC)
+                    .setAlg(Algorithm.valueOf(algorithm))
+                    .setMode(CipherMode.valueOf(mode))
                     .build());
         } catch (ValentinoException e) {
             e.printStackTrace();

@@ -304,3 +304,5 @@ This project is primarily distributed under the terms of the Mozilla Public Lice
 # Valentino
 
 For running valentino tests, copy src/resources/libvalentino.so to /opt/fortanix/ directory
+
+./test-bench.sh run valentino-encryption --threadcount 1 --keyname Valentino --algorithm AES --mode CBC --plain YWJj

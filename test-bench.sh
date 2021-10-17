@@ -32,6 +32,8 @@ KEYSIZE_TEXT="##Keysize##"
 TRANSIENT_TEXT="##Transient##"
 FILEPATH_TEXT="##FilePath##"
 MODE_TEXT="##Mode##"
+KEYNAME_TEXT="##Keyname##"
+PLAIN_TEXT="##Plain##"
 PLUGIN_TYPE_TEXT="##pluginType##"
 PLUGIN_ID_TEXT="##pluginId##"
 RADIX_TEXT="##radix##"
@@ -48,6 +50,8 @@ KEYSIZE="1024"
 TRANSIENT="false"
 FILEPATH=""
 MODE=""
+KEYNAME=""
+PLAIN=""
 MAX_FILE=""
 PLUGIN_TYPE=""
 PLUGIN_ID=""
@@ -75,6 +79,8 @@ function update_jmx(){
     sed -i.bak s/$KEYSIZE_TEXT/$KEYSIZE/g $JMX_FILE
     sed -i.bak s/$TRANSIENT_TEXT/$TRANSIENT/g $JMX_FILE
     sed -i.bak s/$MODE_TEXT/$MODE/g $JMX_FILE
+    sed -i.bak s/$KEYNAME_TEXT/$KEYNAME/g $JMX_FILE
+    sed -i.bak s/$PLAIN_TEXT/$PLAIN/g $JMX_FILE
     if [[ "${MAX_FILE}" == "true" ]]; then
         FILEPATH=$SDKMS_REST_API_HOME"/src/test/resources/LargeFile.txt"
     fi
@@ -148,6 +154,12 @@ while [ $# -gt 0 ]; do
       ;;
     --mode)
       MODE="$2"
+      ;;
+    --keyname)
+      KEYNAME="$2"
+      ;;
+    --plain)
+      PLAIN="$2"
       ;;
     --max-file)
       MAX_FILE="$2"
@@ -492,7 +504,7 @@ function sign_task() {
     print_end $FILE_NAME $OPERATION
 }
 
-function signn_task() {
+function encrypt_valentino_task() {
     if [ "$1" == "${HELP}" ];
     then
         echo "sign captures metrics for RSA or EC signature generation"
@@ -768,9 +780,6 @@ function run_task(){
             ;;
         sign)
             task="sign_task"
-            ;;
-        signn)
-            task="signn_task"
             ;;
         verify)
             task="verify_task"

@@ -41,6 +41,11 @@
                 <stringProp name="Argument.value">##Mode##</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
+              <elementProp name="plain" elementType="Argument">
+                  <stringProp name="Argument.name">plain</stringProp>
+                  <stringProp name="Argument.value">##Plain##</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
             </collectionProp>
           </elementProp>
           <stringProp name="classname">com.fortanix.sdkms.performance.sampler.valentino.EncryptionValentinoSampler</stringProp>
