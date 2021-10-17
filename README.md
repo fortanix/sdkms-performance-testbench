@@ -300,3 +300,7 @@ this project or the open source license(s) involved.
 # License
 
 This project is primarily distributed under the terms of the Mozilla Public License (MPL) 2.0, see [LICENSE](./LICENSE) for details.
+
+# Valentino
+
+For running valentino tests, copy src/resources/libvalentino.so to /opt/fortanix/ directory

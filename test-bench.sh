@@ -272,6 +272,7 @@ function build_task() {
         return
     fi
     info "Build operation is selected"
+    mvn install:install-file
     mvn install -DskipTests;
 }
 
