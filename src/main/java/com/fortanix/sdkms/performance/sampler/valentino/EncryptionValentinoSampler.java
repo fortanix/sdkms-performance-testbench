@@ -60,6 +60,8 @@ public class EncryptionValentinoSampler extends AbstractJavaSamplerClient {
         String mode = context.getParameter(MODE);
         String plainBase64 = context.getParameter(PLAIN);
         Kid kid = null;
+        SampleResult result = new SampleResult();
+        result.sampleStart();
         try {
             System.out.println("Looking up kid with name : " + keyName);
             kid = valentino.lookup(keyName);
@@ -68,8 +70,6 @@ public class EncryptionValentinoSampler extends AbstractJavaSamplerClient {
         }
 
         byte[] plain = Base64.getEncoder().encode(plainBase64.getBytes());
-        SampleResult result = new SampleResult();
-        result.sampleStart();
         try {
             EncryptResponse encryptResp = valentino.encrypt(EncryptRequest.builder()
                     .setKid(kid)
