@@ -39,7 +39,7 @@ public class EncryptionValentinoSampler extends AbstractJavaSamplerClient {
         try {
             valentino =  new Valentino(url);
         } catch (ValentinoException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Error initializing valentino client with sdkms url: " + url+ " Exception: " + e);
         }
         String basicAuthString = System.getenv(FORTANIX_API_KEY);
         if (StringUtils.isBlank(basicAuthString)) {
@@ -48,7 +48,7 @@ public class EncryptionValentinoSampler extends AbstractJavaSamplerClient {
         try {
             this.login();
         } catch (ValentinoException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Cannot login to the valentino client: " + e);
         }
     }
 
@@ -64,7 +64,7 @@ public class EncryptionValentinoSampler extends AbstractJavaSamplerClient {
             System.out.println("Looking up kid with name : " + keyName);
             kid = valentino.lookup(keyName);
         } catch (ValentinoException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Error looking up the kid: " + e);
         }
 
         byte[] plain = Base64.getEncoder().encode(plainBase64.getBytes());
@@ -78,7 +78,7 @@ public class EncryptionValentinoSampler extends AbstractJavaSamplerClient {
                     .setMode(CipherMode.valueOf(mode))
                     .build());
         } catch (ValentinoException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Error while encryption: " + e);
         }
         result.setSuccessful(true);
         result.sampleEnd();

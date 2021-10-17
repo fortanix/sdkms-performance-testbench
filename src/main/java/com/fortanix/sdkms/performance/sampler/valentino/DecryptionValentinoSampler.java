@@ -39,7 +39,7 @@ public class DecryptionValentinoSampler extends AbstractJavaSamplerClient {
         try {
             valentino =  new Valentino(url);
         } catch (ValentinoException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Error initializing valentino client :" + e);
         }
         String basicAuthString = System.getenv(FORTANIX_API_KEY);
         if (StringUtils.isBlank(basicAuthString)) {
@@ -48,7 +48,7 @@ public class DecryptionValentinoSampler extends AbstractJavaSamplerClient {
         try {
             this.login();
         } catch (ValentinoException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Error logging in :" + e);
         }
     }
 
@@ -66,12 +66,12 @@ public class DecryptionValentinoSampler extends AbstractJavaSamplerClient {
             System.out.println("Looking up kid with name : " + keyName);
             kid = valentino.lookup(keyName);
         } catch (ValentinoException e) {
-            e.printStackTrace();
+            LOGGER.info("Error while looking up the kid " + e);
         }
         byte[] plain = Base64.getDecoder().decode(cipherBase64.getBytes());
         byte[] iv = Base64.getDecoder().decode(ivBase64.getBytes());
 
-        LOGGER.info("Decrypting request: {" +plain+ "} with kid: {"+kid+"}");
+        LOGGER.log(Level.SEVERE, "Decrypting request: {" +plain+ "} with kid: {"+kid+"}");
         DecryptResponse decryptResp = null;
         try {
             decryptResp = valentino.decrypt(DecryptRequest.builder()
@@ -82,7 +82,7 @@ public class DecryptionValentinoSampler extends AbstractJavaSamplerClient {
                     .setIv(iv)
                     .build());
         } catch (ValentinoException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Error encountered during decryption: " + e);
         }
         LOGGER.info("Decryption successful with response: {"+decryptResp.toString()+"}");
         result.setSuccessful(true);
