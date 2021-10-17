@@ -64,8 +64,11 @@ public class DecryptionValentinoSampler extends AbstractJavaSamplerClient {
         } catch (ValentinoException e) {
             e.printStackTrace();
         }
-        byte[] plain = Base64.getDecoder().decode("ccdoxGvkDVd0mjfQtBsEoQ==".getBytes());
+        byte[] plain = Base64.getDecoder().decode("ccdoxGvkDVd0mjfQtB==".getBytes());
         byte[] iv = Base64.getDecoder().decode("EUcRsWGVG827XlamU2dXvg==".getBytes());
+
+//        byte[] plain = "[B@191fa6f91111".getBytes();
+//        byte[] iv = "[B@73dc0b8a".getBytes();
 
         LOGGER.info("Decrypting request: {" +plain+ "} with kid: {"+kid+"}");
         DecryptResponse decryptResp = null;
