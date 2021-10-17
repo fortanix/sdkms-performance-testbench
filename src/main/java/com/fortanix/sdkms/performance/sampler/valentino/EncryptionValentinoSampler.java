@@ -13,9 +13,9 @@ import java.util.logging.Logger;
 import static com.fortanix.sdkms.performance.sampler.Constants.ALGORITHM;
 import static com.fortanix.sdkms.performance.sampler.Constants.MODE;
 
-public class TestSampler extends AbstractJavaSamplerClient {
+public class EncryptionValentinoSampler extends AbstractJavaSamplerClient {
 
-    static final Logger LOGGER = Logger.getLogger(TestSampler.class.getName());
+    static final Logger LOGGER = Logger.getLogger(EncryptionValentinoSampler.class.getName());
 
     private static final String FORTANIX_API_ENDPOINT = "FORTANIX_API_ENDPOINT";
     private static final String FORTANIX_API_KEY = "FORTANIX_API_KEY";

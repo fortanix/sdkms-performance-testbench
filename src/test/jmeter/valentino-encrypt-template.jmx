@@ -38,7 +38,7 @@
               </elementProp>
             </collectionProp>
           </elementProp>
-          <stringProp name="classname">com.fortanix.sdkms.performance.sampler.valentino.TestSampler</stringProp>
+          <stringProp name="classname">com.fortanix.sdkms.performance.sampler.valentino.EncryptionValentinoSampler</stringProp>
         </JavaSampler>
         <hashTree/>
       </hashTree>
