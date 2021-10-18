@@ -7,6 +7,8 @@ import org.apache.jmeter.samplers.SampleResult;
 import javax.crypto.Cipher;
 import java.util.logging.Level;
 
+import static com.fortanix.sdkms.performance.sampler.Constants.ALGORITHM;
+
 public class EncryptionJCESampler extends EncryptDecryptBaseJCESampler {
     private static final String AAD = "SampleAAD";
 
@@ -15,7 +17,13 @@ public class EncryptionJCESampler extends EncryptDecryptBaseJCESampler {
         SampleResult result = new SampleResult();
         result.sampleStart();
         try {
-            this.cipher.init(Cipher.ENCRYPT_MODE, this.key, this.params);
+            String algorithm = javaSamplerContext.getParameter(ALGORITHM, "AES");
+            if(algorithm.equals("RSA")) {
+                this.cipher.init(Cipher.ENCRYPT_MODE, this.keyPair.getPrivate(), this.params);
+            }
+            else {
+                this.cipher.init(Cipher.ENCRYPT_MODE, this.key, this.params);
+            }
             if(mode.equals(CryptMode.GCM)) {
                 cipher.updateAAD(AAD.getBytes());
             }
