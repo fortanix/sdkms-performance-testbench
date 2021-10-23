@@ -438,7 +438,12 @@ function decryption_task() {
     OPERATION=DECRYPTION
     validate
     get_input ${@:1}
-    update_jmx "/src/test/jmeter/decrypt-${INTERFACE}-template.jmx" "/target/jmx/"$FILE_NAME".jmx"
+    if [ "$TYPE" == "valentino" ];
+    then
+      update_jmx "/src/test/jmeter/decrypt-valentino-template.jmx" "/target/jmx/"$FILE_NAME".jmx"
+    else
+      update_jmx "/src/test/jmeter/decrypt-${INTERFACE}-template.jmx" "/target/jmx/"$FILE_NAME".jmx"
+    fi
     print_start
     mvn verify -Djmx.path="target/jmx" $JVM_ARGS
     print_end $FILE_NAME $OPERATION
