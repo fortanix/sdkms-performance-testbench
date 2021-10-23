@@ -1,7 +1,7 @@
 #!/bin/bash
 
 set -eo pipefail
-  
+
 if [ ! -f $PWD/env ]; then
    echo "env file missing. Run python3.7 ./setup_script.py - to create"
    exit
@@ -67,6 +67,7 @@ JVM_ARGS_INPUT=""
 JVM_ARGS=""
 FILE_IDF=$(date +%F-%H_%M_%S)
 INTERFACE="sdk"
+TYPE="server"
 
 #Function to update jmx text using value
 function update_jmx(){
@@ -136,6 +137,9 @@ while [ $# -gt 0 ]; do
   case "$1" in
     --interface)
       INTERFACE="$2"
+      ;;
+    --type)
+      TYPE="$2"
       ;;
     --algorithm)
       ALGORITHM="$2"
@@ -229,9 +233,9 @@ function print_end(){
     fi
     if [ -z "$BATCH_SIZE" ]
     then
-        AGGREGATE_OUTPUT_FILE=$SDKMS_REST_API_HOME"/target/jmeter/results/"$2"-"$ALGORITHM"-"$KEYSIZE"-"$INTERFACE"-"$THREAD_COUNT"THREADS-"$EXECUTION_TIME"SECONDS-"$FILE_IDF_SUB"-AGGREGATE.csv"
+        AGGREGATE_OUTPUT_FILE=$SDKMS_REST_API_HOME"/target/jmeter/results/"$2"-"$ALGORITHM"-"$KEYSIZE"-"$INTERFACE"-"$TYPE"-"$THREAD_COUNT"THREADS-"$EXECUTION_TIME"SECONDS-"$FILE_IDF_SUB"-AGGREGATE.csv"
     else
-        AGGREGATE_OUTPUT_FILE=$SDKMS_REST_API_HOME"/target/jmeter/results/"BATCH""$2"-"$ALGORITHM"-"$KEYSIZE"-"$INTERFACE"-"$THREAD_COUNT"THREADS-"$EXECUTION_TIME"SECONDS-BATCHSIZE-"$BATCH_SIZE"-"$FILE_IDF_SUB"-AGGREGATE.csv"
+        AGGREGATE_OUTPUT_FILE=$SDKMS_REST_API_HOME"/target/jmeter/results/"BATCH""$2"-"$ALGORITHM"-"$KEYSIZE"-"$INTERFACE"-"$TYPE"-"$THREAD_COUNT"THREADS-"$EXECUTION_TIME"SECONDS-BATCHSIZE-"$BATCH_SIZE"-"$FILE_IDF_SUB"-AGGREGATE.csv"
     fi
     java -jar $SDKMS_REST_API_HOME"/target/jmeter/lib/ext/cmdrunner-2.0.jar" --tool Reporter --generate-csv $AGGREGATE_OUTPUT_FILE --input-jtl $CSV_OUTPUT_FILE --plugin-type AggregateReport
 
@@ -250,8 +254,8 @@ function print_end(){
 
     awk -v THREADS="$THREAD_COUNT" -v CAPACITY="$BANDWIDTH" -v TIME="$EXECUTION_TIME" -v OP_NAME="$OP_NAME" 'BEGIN { FS=","; OFS="," }; FNR == 1 { print "operation","threads","duration(sec)","total operations","average latency(ms)","p90 latency(ms)","p99 latency(ms)","min latency (ms)","max latency (ms)","Error %","Throughput per sec","Cipher capacity (kb/s)" }; FNR  ==2 { print OP_NAME,THREADS,TIME,$2,$3,$5,$7,$8,$9,$10,$11,CAPACITY }' $AGGREGATE_OUTPUT_FILE > temp.csv && mv temp.csv $AGGREGATE_OUTPUT_FILE;
 
-    mv $HTML_OUTPUT_DIR $SDKMS_REST_API_HOME"/target/jmeter/reports/"$2"-"$ALGORITHM"-"$KEYSIZE"-"$INTERFACE"-"$THREAD_COUNT"THREADS-"$EXECUTION_TIME"SECONDS-"$FILE_IDF_SUB"-HTML"
-    mv $CSV_OUTPUT_FILE $SDKMS_REST_API_HOME"/target/jmeter/results/"$2"-"$ALGORITHM"-"$KEYSIZE"-"$INTERFACE"-"$THREAD_COUNT"THREADS-"$EXECUTION_TIME"SECONDS-"$FILE_IDF_SUB"-DATA.csv"
+    mv $HTML_OUTPUT_DIR $SDKMS_REST_API_HOME"/target/jmeter/reports/"$2"-"$ALGORITHM"-"$KEYSIZE"-"$INTERFACE"-"$TYPE"-"$THREAD_COUNT"THREADS-"$EXECUTION_TIME"SECONDS-"$FILE_IDF_SUB"-HTML"
+    mv $CSV_OUTPUT_FILE $SDKMS_REST_API_HOME"/target/jmeter/results/"$2"-"$ALGORITHM"-"$KEYSIZE"-"$INTERFACE"-"$TYPE"-"$THREAD_COUNT"THREADS-"$EXECUTION_TIME"SECONDS-"$FILE_IDF_SUB"-DATA.csv"
     info "Html output can be found at "$HTML_OUTPUT_DIR"/index.html"
     info "csv output can be found at "$AGGREGATE_OUTPUT_FILE
 }
@@ -388,7 +392,12 @@ function encryption_task() {
     OPERATION=ENCRYPTION
     validate
     get_input ${@:1}
-    update_jmx "/src/test/jmeter/encrypt-${INTERFACE}-template.jmx" "/target/jmx/"$FILE_NAME".jmx"
+    if [ "$TYPE" == "valentino" ];
+    then
+      update_jmx "/src/test/jmeter/encrypt-valentino-template.jmx" "/target/jmx/"$FILE_NAME".jmx"
+    else
+      update_jmx "/src/test/jmeter/encrypt-${INTERFACE}-template.jmx" "/target/jmx/"$FILE_NAME".jmx"
+    fi
     print_start
     mvn verify -Djmx.path="target/jmx" $JVM_ARGS
     print_end $FILE_NAME $OPERATION
