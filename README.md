@@ -300,3 +300,13 @@ this project or the open source license(s) involved.
 # License
 
 This project is primarily distributed under the terms of the Mozilla Public License (MPL) 2.0, see [LICENSE](./LICENSE) for details.
+
+# Valentino
+
+For running valentino tests, get libvalentino.so and put it into the directory /opt/fortanix/ directory
+
+Put Valentino.jar inside src/main/resources folder
+
+Run ./test-bench.sh clean and ./test-bench.sh build
+
+./test-bench.sh run valentino-encryption --threadcount 1 --keyname Valentino --algorithm AES --mode CBC --plain YWJj

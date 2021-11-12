@@ -27,6 +27,11 @@
             <version>3.23.1408</version>
         </dependency>
         <dependency>
+            <groupId>com.fortanix.valentino</groupId>
+            <artifactId>valentino</artifactId>
+            <version>1.0</version>
+        </dependency>
+        <dependency>
             <groupId>com.fortanix</groupId>
             <artifactId>sdkms-jce-provider</artifactId>
             <version>3.23.1408</version>
@@ -130,6 +135,28 @@
                     <testFilesDirectory>${jmx.path}</testFilesDirectory>
                     <appendResultsTimestamp>true</appendResultsTimestamp>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-install-plugin</artifactId>
+                <version>2.5.1</version>
+                <configuration>
+                    <groupId>com.fortanix.valentino</groupId>
+                    <artifactId>valentino</artifactId>
+                    <version>1.0</version>
+                    <packaging>jar</packaging>
+                    <file>src/main/resources/Valentino.jar</file>
+                    <generatePom>true</generatePom>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>install-jar-lib</id>
+                        <goals>
+                            <goal>install-file</goal>
+                        </goals>
+                        <phase>validate</phase>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
