@@ -27,6 +27,7 @@ RUN_OPERATIONS=(keygen_task encryption_task decryption_task sign_task verify_tas
 THREAD_COUNT_TEXT="##ThreadCount##"
 RAMP_UP_TEXT="##RampUpCount##"
 STEPS_TEXT="##StepsCount##"
+KEYNAME_TEXT="##Keyname##"
 EXECUTION_TIME_TEXT="##ExecutionTime##"
 ALGORITHM_TEXT="##Algorithm##"
 HASH_ALGORITHM_TEXT="##HashAlgorithm##"
@@ -45,8 +46,11 @@ SDKMS_REST_API_HOME=${SDKMS_REST_API_HOME:-${PWD}}
 THREAD_COUNT="5"
 EXECUTION_TIME="30"
 ALGORITHM="RSA"
+KEYNAME=""
 HASH_ALGORITHM="SHA1"
 KEYSIZE="1024"
+RAMPUPCOUNT="0"
+STEPSCOUNT="0"
 TRANSIENT="false"
 FILEPATH=""
 MODE=""
@@ -71,6 +75,7 @@ function update_jmx(){
     JMX_FILE=$SDKMS_REST_API_HOME$2
     #Replacing params based on input/default
     sed -i.bak s/$THREAD_COUNT_TEXT/$THREAD_COUNT/g $JMX_FILE
+    sed -i.bak s/$KEYNAME_TEXT/$KEYNAME/g $JMX_FILE
     sed -i.bak s/$RAMP_UP_TEXT/$RAMPUPCOUNT/g $JMX_FILE
     sed -i.bak s/$STEPS_TEXT/$STEPSCOUNT/g $JMX_FILE
     sed -i.bak s/$EXECUTION_TIME_TEXT/$EXECUTION_TIME/g $JMX_FILE
@@ -134,6 +139,9 @@ while [ $# -gt 0 ]; do
       ;;
     --keysize)
       KEYSIZE="$2"
+      ;;
+    --keyname)
+      KEYNAME="$2"
       ;;
     --threadcount)
       THREAD_COUNT="$2"

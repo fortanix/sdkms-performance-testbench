@@ -17,7 +17,7 @@ import com.fortanix.sdkms.v1.api.SecurityObjectsApi;
 import com.fortanix.sdkms.v1.model.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jmeter.protocol.java.sampler.JavaSamplerContext;
-
+import java.util.List;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -58,20 +58,41 @@ public abstract class AbstractEncryptionAndDecryptionSampler extends AbstractSDK
                 throw new ProviderException(e.getMessage());
             }
         }
+
+
         super.setupTest(context);
         this.securityObjectsApi = new SecurityObjectsApi(this.apiClient);
-        SobjectRequest sobjectRequest = new SobjectRequest().name(UUID.randomUUID().toString()).objType(objectType).keySize(keySize);
-        if(CryptMode.fromValue(mode) == CryptMode.FPE) {
-            // TODO: To support more datatypes as input parameter.
-            FpeOptions fpeOptions = new FpeOptions().radix(10);
-            sobjectRequest.fpe(fpeOptions);
+        String keyName = context.getParameter(KEYNAME, "");
+        List<KeyObject> sObjects;
+        KeyObject matched = null;
+        if(keyName != ""){
+            try {
+                sObjects = securityObjectsApi.getSecurityObjects(keyName, null, null, null, true, null, null, null);
+                matched = sObjects.get(0);
+            }
+            catch(ApiException e){
+                LOGGER.log(Level.INFO, "failed to get the keyObject from keyName: " + e.getMessage(), e);
+            }
         }
-        try {
-            this.keyId = this.securityObjectsApi.generateSecurityObject(sobjectRequest).getKid();
-        } catch (ApiException e) {
-            LOGGER.log(Level.INFO, "failure in creating key : " + e.getMessage(), e);
-            throw new ProviderException(e.getMessage());
+        if(matched != null){
+            this.keyId = matched.getKid();
         }
+        else{
+            SobjectRequest sobjectRequest = new SobjectRequest().name(UUID.randomUUID().toString()).objType(objectType).keySize(keySize);
+            if(CryptMode.fromValue(mode) == CryptMode.FPE) {
+                // TODO: To support more datatypes as input parameter.
+                FpeOptions fpeOptions = new FpeOptions().radix(10);
+                sobjectRequest.fpe(fpeOptions);
+            }
+            try {
+                this.keyId = this.securityObjectsApi.generateSecurityObject(sobjectRequest).getKid();
+            } catch (ApiException e) {
+                LOGGER.log(Level.INFO, "failure in creating key : " + e.getMessage(), e);
+                throw new ProviderException(e.getMessage());
+            }
+        }
+
+
         this.encryptionDecryptionHelper = EncryptionDecryptionFactory.getHelper(EncryptionDecryptionType.valueOf(algorithm), CryptMode.fromValue(mode));
         this.encryptRequestEx = this.encryptionDecryptionHelper.createEncryptRequest(new SobjectDescriptor().kid(this.keyId), input);
         this.encryptRequest = this.encryptionDecryptionHelper.createEncryptRequest(input);
