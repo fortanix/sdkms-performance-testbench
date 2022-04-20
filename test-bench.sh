@@ -1,7 +1,7 @@
 #!/bin/bash
 
 set -eo pipefail
-  
+
 if [ ! -f $PWD/env ]; then
    echo "env file missing. Run python3.7 ./setup_script.py - to create"
    exit
@@ -25,6 +25,8 @@ SCRIPT_NAME="test-bench.sh"
 TB_OPERATIONS=(build_task clean_task run_task)
 RUN_OPERATIONS=(keygen_task encryption_task decryption_task sign_task verify_task plugin_task)
 THREAD_COUNT_TEXT="##ThreadCount##"
+RAMP_UP_TEXT="##RampUpCount##"
+STEPS_TEXT="##StepsCount##"
 EXECUTION_TIME_TEXT="##ExecutionTime##"
 ALGORITHM_TEXT="##Algorithm##"
 HASH_ALGORITHM_TEXT="##HashAlgorithm##"
@@ -69,6 +71,8 @@ function update_jmx(){
     JMX_FILE=$SDKMS_REST_API_HOME$2
     #Replacing params based on input/default
     sed -i.bak s/$THREAD_COUNT_TEXT/$THREAD_COUNT/g $JMX_FILE
+    sed -i.bak s/$RAMP_UP_TEXT/$RAMPUPCOUNT/g $JMX_FILE
+    sed -i.bak s/$STEPS_TEXT/$STEPSCOUNT/g $JMX_FILE
     sed -i.bak s/$EXECUTION_TIME_TEXT/$EXECUTION_TIME/g $JMX_FILE
     sed -i.bak s/$ALGORITHM_TEXT/$ALGORITHM/g $JMX_FILE
     sed -i.bak s/$HASH_ALGORITHM_TEXT/$HASH_ALGORITHM/g $JMX_FILE
@@ -136,6 +140,12 @@ while [ $# -gt 0 ]; do
       ;;
     --time)
       EXECUTION_TIME="$2"
+      ;;
+    --rampup)
+      RAMPUPCOUNT="$2"
+      ;;
+    --steps)
+      STEPSCOUNT="$2"
       ;;
     --transient)
       TRANSIENT="$2"
@@ -272,7 +282,7 @@ function build_task() {
         return
     fi
     info "Build operation is selected"
-    mvn install -DskipTests;
+    mvn clean install -DskipTests;
 }
 
 function clean_task() {
