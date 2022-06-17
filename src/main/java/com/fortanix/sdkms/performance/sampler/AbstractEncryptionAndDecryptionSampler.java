@@ -45,6 +45,7 @@ public abstract class AbstractEncryptionAndDecryptionSampler extends AbstractSDK
         String mode = context.getParameter(MODE, "CBC");
         String filePath = context.getParameter(FILE_PATH);
         int batchSize = context.getIntParameter(BATCH_SIZE, 0);
+        String keyName = context.getParameter(KEYNAME, "");
         ObjectType objectType = ObjectType.fromValue(algorithm);
         String input = "random-text";
         if(CryptMode.fromValue(mode) == CryptMode.FPE) {
@@ -58,11 +59,8 @@ public abstract class AbstractEncryptionAndDecryptionSampler extends AbstractSDK
                 throw new ProviderException(e.getMessage());
             }
         }
-
-
         super.setupTest(context);
         this.securityObjectsApi = new SecurityObjectsApi(this.apiClient);
-        String keyName = context.getParameter(KEYNAME, "");
         List<KeyObject> sObjects;
         KeyObject matched = null;
         if(keyName != ""){
@@ -71,15 +69,15 @@ public abstract class AbstractEncryptionAndDecryptionSampler extends AbstractSDK
                 matched = sObjects.get(0);
             }
             catch(ApiException e){
-                LOGGER.log(Level.INFO, "failed to get the keyObject from keyName: " + e.getMessage(), e);
+                LOGGER.log(Level.INFO, "failure in getting keyObject from keyName: " + e.getMessage(), e);
             }
         }
         if(matched != null){
             this.keyId = matched.getKid();
         }
-        else{
+        else {
             SobjectRequest sobjectRequest = new SobjectRequest().name(UUID.randomUUID().toString()).objType(objectType).keySize(keySize);
-            if(CryptMode.fromValue(mode) == CryptMode.FPE) {
+            if (CryptMode.fromValue(mode) == CryptMode.FPE) {
                 // TODO: To support more datatypes as input parameter.
                 FpeOptions fpeOptions = new FpeOptions().radix(10);
                 sobjectRequest.fpe(fpeOptions);
@@ -91,8 +89,6 @@ public abstract class AbstractEncryptionAndDecryptionSampler extends AbstractSDK
                 throw new ProviderException(e.getMessage());
             }
         }
-
-
         this.encryptionDecryptionHelper = EncryptionDecryptionFactory.getHelper(EncryptionDecryptionType.valueOf(algorithm), CryptMode.fromValue(mode));
         this.encryptRequestEx = this.encryptionDecryptionHelper.createEncryptRequest(new SobjectDescriptor().kid(this.keyId), input);
         this.encryptRequest = this.encryptionDecryptionHelper.createEncryptRequest(input);
@@ -109,10 +105,13 @@ public abstract class AbstractEncryptionAndDecryptionSampler extends AbstractSDK
 
     @Override
     public void teardownTest(JavaSamplerContext context) {
-        try {
-            this.securityObjectsApi.deleteSecurityObject(this.keyId);
-        } catch (ApiException e) {
-            LOGGER.log(Level.INFO, "failure in deleting key : " + e.getMessage(), e);
+        String keyName = context.getParameter(KEYNAME, "");
+        if(keyName == ""){
+            try {
+                this.securityObjectsApi.deleteSecurityObject(this.keyId);
+            } catch (ApiException e) {
+                LOGGER.log(Level.INFO, "failure in deleting key : " + e.getMessage(), e);
+            }
         }
         super.teardownTest(context);
     }

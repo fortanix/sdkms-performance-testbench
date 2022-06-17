@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.ProviderException;
+import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
 
@@ -43,6 +44,7 @@ public abstract class AbstractSignatureSampler extends AbstractSDKMSSamplerClien
         String filePath = context.getParameter(FILE_PATH);
         int batchSize = context.getIntParameter(BATCH_SIZE, 0);
         String inputDigestAlgorithm = context.getParameter(HASH_ALGORITHM, "SHA1").toUpperCase();
+        String keyName = context.getParameter(KEYNAME, "");
         DigestAlgorithm digestAlgorithm = DigestAlgorithm.fromValue(inputDigestAlgorithm);
         ObjectType objectType = ObjectType.fromValue(algorithm);
         String input = "random-text";
@@ -68,17 +70,33 @@ public abstract class AbstractSignatureSampler extends AbstractSDKMSSamplerClien
         }
         this.hash = digestResponse.getDigest();
         this.securityObjectsApi = new SecurityObjectsApi(this.apiClient);
-        SobjectRequest sobjectRequest = new SobjectRequest().name(UUID.randomUUID().toString()).objType(objectType);
-        if (objectType == ObjectType.EC) {
-            sobjectRequest.setEllipticCurve(EllipticCurve.fromValue(keySize));
-        } else {
-            sobjectRequest.setKeySize(Integer.parseInt(keySize));
+        List<KeyObject> sObjects;
+        KeyObject matched = null;
+        if(keyName != ""){
+            try {
+                sObjects = securityObjectsApi.getSecurityObjects(keyName, null, null, null, true, null, null, null);
+                matched = sObjects.get(0);
+            }
+            catch(ApiException e){
+                LOGGER.log(Level.INFO, "failure in getting keyObject from keyName: " + e.getMessage(), e);
+            }
         }
-        try {
-            this.keyId = this.securityObjectsApi.generateSecurityObject(sobjectRequest).getKid();
-        } catch (ApiException e) {
-            LOGGER.log(Level.INFO, "failure in creating key : " + e.getMessage(), e);
-            throw new ProviderException(e.getMessage());
+        if(matched != null){
+            this.keyId = matched.getKid();
+        }
+        else {
+            SobjectRequest sobjectRequest = new SobjectRequest().name(UUID.randomUUID().toString()).objType(objectType);
+            if (objectType == ObjectType.EC) {
+                sobjectRequest.setEllipticCurve(EllipticCurve.fromValue(keySize));
+            } else {
+                sobjectRequest.setKeySize(Integer.parseInt(keySize));
+            }
+            try {
+                this.keyId = this.securityObjectsApi.generateSecurityObject(sobjectRequest).getKid();
+            } catch (ApiException e) {
+                LOGGER.log(Level.INFO, "failure in creating key : " + e.getMessage(), e);
+                throw new ProviderException(e.getMessage());
+            }
         }
         this.signRequest = new SignRequest().hashAlg(digestAlgorithm).hash(this.hash);
         this.signRequestEx = new SignRequestEx().hashAlg(digestAlgorithm).hash(this.hash).key(new SobjectDescriptor().kid(this.keyId));
@@ -93,10 +111,13 @@ public abstract class AbstractSignatureSampler extends AbstractSDKMSSamplerClien
 
     @Override
     public void teardownTest(JavaSamplerContext context) {
-        try {
-            this.securityObjectsApi.deleteSecurityObject(this.keyId);
-        } catch (ApiException e) {
-            LOGGER.log(Level.INFO, "failure in deleting key : " + e.getMessage(), e);
+        String keyName = context.getParameter(KEYNAME, "");
+        if(keyName == ""){
+            try {
+                this.securityObjectsApi.deleteSecurityObject(this.keyId);
+            } catch (ApiException e) {
+                LOGGER.log(Level.INFO, "failure in deleting key : " + e.getMessage(), e);
+            }
         }
         super.teardownTest(context);
     }

@@ -41,6 +41,11 @@
                   <stringProp name="Argument.value">##Keyname##</stringProp>
                   <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
+              <elementProp name="keyName" elementType="Argument">
+                  <stringProp name="Argument.name">keyName</stringProp>
+                  <stringProp name="Argument.value">##Keyname##</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
               <elementProp name="filePath" elementType="Argument">
                 <stringProp name="Argument.name">filePath</stringProp>
                 <stringProp name="Argument.value">##FilePath##</stringProp>
