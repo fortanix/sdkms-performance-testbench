@@ -118,7 +118,7 @@ if __name__ == '__main__':
         'create': True,
         'email': ''.join(secrets.choice(
             string.ascii_uppercase + string.digits)for i in range(10)) + '@' + domain,
-        'password': 'admin@123',
+        'password': 'newadmin@123',
         'first_name': 'Test User',
         'last_name': 'Postman',
         'account_name': ''.join(secrets.choice(

@@ -21,6 +21,7 @@ public class Constants {
     public static final List<Integer> INVALID_SESSION_CODES = Arrays.asList(HttpURLConnection.HTTP_UNAUTHORIZED);
     public static final List<String> INVALID_SESSION_MESSAGES = Arrays.asList("Session does not exist");
 
+    public static final String KEYNAME = "keyName";
     public static final String ALGORITHM = "algorithm";
     public static final String KEY_SIZE = "keySize";
     public static final String TRANSIENT = "transient";

@@ -15,8 +15,8 @@
         <elementProp name="ThreadGroup.main_controller" elementType="com.blazemeter.jmeter.control.VirtualUserController"/>
         <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
         <stringProp name="TargetLevel">##ThreadCount##</stringProp>
-        <stringProp name="RampUp">0</stringProp>
-        <stringProp name="Steps">0</stringProp>
+        <stringProp name="RampUp">##RampUpCount##</stringProp>
+        <stringProp name="Steps">##StepsCount##</stringProp>
         <stringProp name="Hold">##ExecutionTime##</stringProp>
         <stringProp name="LogFilename"></stringProp>
         <stringProp name="Iterations"></stringProp>
@@ -35,6 +35,11 @@
                 <stringProp name="Argument.name">keySize</stringProp>
                 <stringProp name="Argument.value">##Keysize##</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+              <elementProp name="keyName" elementType="Argument">
+                  <stringProp name="Argument.name">keyName</stringProp>
+                  <stringProp name="Argument.value">##Keyname##</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
               <elementProp name="filePath" elementType="Argument">
                 <stringProp name="Argument.name">filePath</stringProp>

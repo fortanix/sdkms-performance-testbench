@@ -1,7 +1,7 @@
 #!/bin/bash
 
 set -eo pipefail
-  
+
 if [ ! -f $PWD/env ]; then
    echo "env file missing. Run python3.7 ./setup_script.py - to create"
    exit
@@ -25,6 +25,9 @@ SCRIPT_NAME="test-bench.sh"
 TB_OPERATIONS=(build_task clean_task run_task)
 RUN_OPERATIONS=(keygen_task encryption_task decryption_task sign_task verify_task plugin_task)
 THREAD_COUNT_TEXT="##ThreadCount##"
+RAMP_UP_TEXT="##RampUpCount##"
+STEPS_TEXT="##StepsCount##"
+KEYNAME_TEXT="##Keyname##"
 EXECUTION_TIME_TEXT="##ExecutionTime##"
 ALGORITHM_TEXT="##Algorithm##"
 HASH_ALGORITHM_TEXT="##HashAlgorithm##"
@@ -43,8 +46,11 @@ SDKMS_REST_API_HOME=${SDKMS_REST_API_HOME:-${PWD}}
 THREAD_COUNT="5"
 EXECUTION_TIME="30"
 ALGORITHM="RSA"
+KEYNAME=""
 HASH_ALGORITHM="SHA1"
 KEYSIZE="1024"
+RAMPUPCOUNT="0"
+STEPSCOUNT="0"
 TRANSIENT="false"
 FILEPATH=""
 MODE=""
@@ -69,6 +75,9 @@ function update_jmx(){
     JMX_FILE=$SDKMS_REST_API_HOME$2
     #Replacing params based on input/default
     sed -i.bak s/$THREAD_COUNT_TEXT/$THREAD_COUNT/g $JMX_FILE
+    sed -i.bak s/$KEYNAME_TEXT/$KEYNAME/g $JMX_FILE
+    sed -i.bak s/$RAMP_UP_TEXT/$RAMPUPCOUNT/g $JMX_FILE
+    sed -i.bak s/$STEPS_TEXT/$STEPSCOUNT/g $JMX_FILE
     sed -i.bak s/$EXECUTION_TIME_TEXT/$EXECUTION_TIME/g $JMX_FILE
     sed -i.bak s/$ALGORITHM_TEXT/$ALGORITHM/g $JMX_FILE
     sed -i.bak s/$HASH_ALGORITHM_TEXT/$HASH_ALGORITHM/g $JMX_FILE
@@ -131,11 +140,20 @@ while [ $# -gt 0 ]; do
     --keysize)
       KEYSIZE="$2"
       ;;
+    --keyname)
+      KEYNAME="$2"
+      ;;
     --threadcount)
       THREAD_COUNT="$2"
       ;;
     --time)
       EXECUTION_TIME="$2"
+      ;;
+    --rampup)
+      RAMPUPCOUNT="$2"
+      ;;
+    --steps)
+      STEPSCOUNT="$2"
       ;;
     --transient)
       TRANSIENT="$2"
@@ -187,7 +205,7 @@ update_jvm_args
 #Function to print start of test
 function print_start(){
     info "#######################################################################################"
-    info "Running Jmeter for operation: "$OPERATION" using algorithm: "$ALGORITHM", keysize: "$KEYSIZE", mode:"$MODE", interface: "$INTERFACE", inputFilePath: "$FILEPATH", transient: "$TRANSIENT", Threadcount: "$THREAD_COUNT", time: "$EXECUTION_TIME
+    info "Running Jmeter for operation: "$OPERATION" using algorithm: "$ALGORITHM", keysize: "$KEYSIZE", mode:"$MODE", interface: "$INTERFACE", inputFilePath: "$FILEPATH", transient: "$TRANSIENT", Threadcount: "$THREAD_COUNT", time: "$EXECUTION_TIME", rampup: "$RAMPUPCOUNT", steps: "$STEPSCOUNT", keyname: "$KEYNAME
     info "#######################################################################################"
 }
 
@@ -272,7 +290,7 @@ function build_task() {
         return
     fi
     info "Build operation is selected"
-    mvn install -DskipTests;
+    mvn clean install -DskipTests;
 }
 
 function clean_task() {
@@ -310,9 +328,12 @@ function keygen_task() {
         echo "                  default value is 50."
         echo "   --time         Time in seconds to hold the jmeter execution."
         echo "                  default value is 300."
-		echo "   --file-idf     A distinct identifier to add to the output CSV file for easy identification."
+        echo "   --rampup       The ramp-up period tells how long in seconds to take to "ramp-up" to the full number of threads chosen."
+        echo "   --steps        Number of steps taken to "ramp-up" to the full number of threads chosen."
+        echo "                  Each steps adds equal number of threads."
+		    echo "   --file-idf     A distinct identifier to add to the output CSV file for easy identification."
         echo "                  helps in cases when there are multiple consecutive executions of the same operation."
-		echo "                  prevents the older CSV from getting overwritten by the new output file. Adds an epoch timestamp at the end of filename by default."
+		    echo "                  prevents the older CSV from getting overwritten by the new output file. Adds an epoch timestamp at the end of filename by default."
         echo ""
         echo "One can also pass proxy(http/https) related jvm args as a csv string: --jvm-args '-Dhttps.proxyHost=proxy,-Dhttps.proxyPort=8080,-Dhttps.proxyUser=user,-Dhttps.proxyPassword=pwd'"
         return
@@ -351,9 +372,14 @@ function encryption_task() {
         echo "                  default value is 50."
         echo "   --time         Time in seconds to hold the jmeter execution."
         echo "                  default value is 300."
-		echo "   --file-idf     A distinct identifier to add to the output CSV file for easy identification."
+        echo "   --rampup       The ramp-up period tells how long in seconds to take to "ramp-up" to the full number of threads chosen."
+        echo "   --steps        Number of steps taken to "ramp-up" to the full number of threads chosen."
+        echo "                  Each steps adds equal number of threads."
+        echo "   --keyname      Specifies the name of the key to be used."
+        echo "                  Only works for SDK mode."
+		    echo "   --file-idf     A distinct identifier to add to the output CSV file for easy identification."
         echo "                  helps in cases when there are multiple consecutive executions of the same operation."
-		echo "                  prevents the older CSV from getting overwritten by the new output file. Adds an epoch timestamp at the end of filename by default."
+	    	echo "                  prevents the older CSV from getting overwritten by the new output file. Adds an epoch timestamp at the end of filename by default."
         echo ""
         echo "One can also pass proxy(http/https) related jvm args as a csv string: --jvm-args '-Dhttps.proxyHost=proxy,-Dhttps.proxyPort=8080,-Dhttps.proxyUser=user,-Dhttps.proxyPassword=pwd'"
         return
@@ -392,9 +418,14 @@ function decryption_task() {
         echo "                  default value is 50."
         echo "   --time         Time in seconds to hold the jmeter execution."
         echo "                  default value is 300."
-		echo "   --file-idf     A distinct identifier to add to the output CSV file for easy identification."
+        echo "   --rampup       The ramp-up period tells how long in seconds to take to "ramp-up" to the full number of threads chosen."
+        echo "   --steps        Number of steps taken to "ramp-up" to the full number of threads chosen."
+        echo "                  Each steps adds equal number of threads."
+        echo "   --keyname      Specifies the name of the key to be used."
+        echo "                  Only works for SDK mode."
+		    echo "   --file-idf     A distinct identifier to add to the output CSV file for easy identification."
         echo "                  helps in cases when there are multiple consecutive executions of the same operation."
-		echo "                  prevents the older CSV from getting overwritten by the new output file. Adds an epoch timestamp at the end of filename by default."
+		    echo "                  prevents the older CSV from getting overwritten by the new output file. Adds an epoch timestamp at the end of filename by default."
         echo ""
         echo "One can also pass proxy(http/https) related jvm args as a csv string: --jvm-args '-Dhttps.proxyHost=proxy,-Dhttps.proxyPort=8080,-Dhttps.proxyUser=user,-Dhttps.proxyPassword=pwd'"
         return
@@ -430,11 +461,16 @@ function sign_task() {
         echo "                     default value is 50."
         echo "   --time            Time in seconds to hold the jmeter execution."
         echo "                     default value is 300."
+        echo "   --rampup          The ramp-up period tells how long in seconds to take to "ramp-up" to the full number of threads chosen."
+        echo "   --steps           Number of steps taken to "ramp-up" to the full number of threads chosen."
+        echo "                     Each steps adds equal number of threads."
+        echo "   --keyname         Specifies the name of the key to be used."
+        echo "                     Only works for SDK mode."
         echo "   --batchsize       Create a batch sign request with the provided batch size."
         echo "                     Default is 0 (non batch) single sign request."
-		echo "   --file-idf        A distinct identifier to add to the output CSV file for easy identification."
+		    echo "   --file-idf        A distinct identifier to add to the output CSV file for easy identification."
         echo "                     helps in cases when there are multiple consecutive executions of the same operation."
-		echo "                     prevents the older CSV from getting overwritten by the new output file. Adds an epoch timestamp at the end of filename by default."
+		    echo "                     prevents the older CSV from getting overwritten by the new output file. Adds an epoch timestamp at the end of filename by default."
         echo ""
         echo "One can also pass proxy(http/https) related jvm args as a csv string: --jvm-args '-Dhttps.proxyHost=proxy,-Dhttps.proxyPort=8080,-Dhttps.proxyUser=user,-Dhttps.proxyPassword=pwd'"
         return
@@ -470,11 +506,16 @@ function verify_task() {
         echo "                     default value is 50."
         echo "   --time            Time in seconds to hold the jmeter execution."
         echo "                     default value is 300."
+        echo "   --rampup          The ramp-up period tells how long in seconds to take to "ramp-up" to the full number of threads chosen."
+        echo "   --steps           Number of steps taken to "ramp-up" to the full number of threads chosen."
+        echo "                     Each steps adds equal number of threads."
+        echo "   --keyname         Specifies the name of the key to be used."
+        echo "                     Only works for SDK mode."
         echo "   --batchsize       Create a batch verify request with the provided batch size."
         echo "                     Default is 0 (non batch) single verify request."
-		echo "   --file-idf        A distinct identifier to add to the output CSV file for easy identification."
+		    echo "   --file-idf        A distinct identifier to add to the output CSV file for easy identification."
         echo "                     helps in cases when there are multiple consecutive executions of the same operation."
-		echo "                     prevents the older CSV from getting overwritten by the new output file. Adds an epoch timestamp at the end of filename by default."
+		    echo "                     prevents the older CSV from getting overwritten by the new output file. Adds an epoch timestamp at the end of filename by default."
         echo ""
         echo "One can also pass proxy(http/https) related jvm args as a csv string: --jvm-args '-Dhttps.proxyHost=proxy,-Dhttps.proxyPort=8080,-Dhttps.proxyUser=user,-Dhttps.proxyPassword=pwd'"
         return
@@ -508,9 +549,14 @@ function mac_generate_task() {
         echo "                     default value is 50."
         echo "   --time            Time in seconds to hold the jmeter execution."
         echo "                     default value is 300."
-		echo "   --file-idf        A distinct identifier to add to the output CSV file for easy identification."
+        echo "   --rampup          The ramp-up period tells how long in seconds to take to "ramp-up" to the full number of threads chosen."
+        echo "   --steps           Number of steps taken to "ramp-up" to the full number of threads chosen."
+        echo "                     Each steps adds equal number of threads."
+        echo "   --keyname         Specifies the name of the key to be used."
+        echo "                     Only works for SDK mode."
+		    echo "   --file-idf        A distinct identifier to add to the output CSV file for easy identification."
         echo "                     helps in cases when there are multiple consecutive executions of the same operation."
-		echo "                     prevents the older CSV from getting overwritten by the new output file. Adds an epoch timestamp at the end of filename by default."
+		    echo "                     prevents the older CSV from getting overwritten by the new output file. Adds an epoch timestamp at the end of filename by default."
         echo ""
         echo "One can also pass proxy(http/https) related jvm args as a csv string: --jvm-args '-Dhttps.proxyHost=proxy,-Dhttps.proxyPort=8080,-Dhttps.proxyUser=user,-Dhttps.proxyPassword=pwd'"
         return
@@ -544,9 +590,14 @@ function mac_verify_task() {
         echo "                     default value is 50."
         echo "   --time            Time in seconds to hold the jmeter execution."
         echo "                     default value is 300."
-		echo "   --file-idf        A distinct identifier to add to the output CSV file for easy identification."
+        echo "   --rampup          The ramp-up period tells how long in seconds to take to "ramp-up" to the full number of threads chosen."
+        echo "   --steps           Number of steps taken to "ramp-up" to the full number of threads chosen."
+        echo "                     Each steps adds equal number of threads."
+        echo "   --keyname         Specifies the name of the key to be used."
+        echo "                     Only works for SDK mode."
+		    echo "   --file-idf        A distinct identifier to add to the output CSV file for easy identification."
         echo "                     helps in cases when there are multiple consecutive executions of the same operation."
-		echo "                     prevents the older CSV from getting overwritten by the new output file. Adds an epoch timestamp at the end of filename by default."
+		    echo "                     prevents the older CSV from getting overwritten by the new output file. Adds an epoch timestamp at the end of filename by default."
         echo ""
         echo "One can also pass proxy(http/https) related jvm args as a csv string: --jvm-args '-Dhttps.proxyHost=proxy,-Dhttps.proxyPort=8080,-Dhttps.proxyUser=user,-Dhttps.proxyPassword=pwd'"
         return
